@@ -17,6 +17,12 @@ export const authOptions: NextAuthOptions = {
       });
       return !!admin;
     },
+    async session({ session, token }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
   },
   pages: {
     signIn: "/login",
