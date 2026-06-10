@@ -1,4 +1,5 @@
 import { prisma } from "./db";
+import { Prisma } from "@prisma/client";
 import type { Employee } from "@prisma/client";
 
 export type CreateEmployeeInput = Omit<Employee, "createdAt" | "updatedAt">;
@@ -46,23 +47,37 @@ export async function getEmployeeById(id: string) {
 }
 
 export async function createEmployee(data: CreateEmployeeInput) {
-  return prisma.employee.create({
-    data: {
-      ...data,
-      emergencyContact: data.emergencyContact as any,
-    },
-  });
+  try {
+    return await prisma.employee.create({
+      data: {
+        ...data,
+        emergencyContact: data.emergencyContact as any,
+      },
+    });
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function updateEmployee(
   id: string,
   data: Partial<CreateEmployeeInput>
 ) {
-  return prisma.employee.update({
-    where: { id },
-    data: {
-      ...data,
-      emergencyContact: data.emergencyContact ? (data.emergencyContact as any) : undefined,
-    },
-  });
+  try {
+    return await prisma.employee.update({
+      where: { id },
+      data: {
+        ...data,
+        emergencyContact: data.emergencyContact ? (data.emergencyContact as any) : undefined,
+      },
+    });
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      return null;
+    }
+    throw err;
+  }
 }

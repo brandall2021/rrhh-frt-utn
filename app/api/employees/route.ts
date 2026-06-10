@@ -14,7 +14,17 @@ export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  const employee = await createEmployee(body);
-  return Response.json({ data: employee }, { status: 201 });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  try {
+    const employee = await createEmployee(body as any);
+    return Response.json({ data: employee }, { status: 201 });
+  } catch (err: any) {
+    return Response.json({ error: err.message ?? "Error creating employee" }, { status: 500 });
+  }
 }

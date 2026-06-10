@@ -22,7 +22,18 @@ export async function PUT(
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  const employee = await updateEmployee(params.id, body);
-  return Response.json({ data: employee });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  try {
+    const employee = await updateEmployee(params.id, body as any);
+    if (!employee) return Response.json({ error: "Not found" }, { status: 404 });
+    return Response.json({ data: employee });
+  } catch (err: any) {
+    return Response.json({ error: err.message ?? "Error updating employee" }, { status: 500 });
+  }
 }
