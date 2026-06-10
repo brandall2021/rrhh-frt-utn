@@ -16,7 +16,7 @@ model AdminUser {
 }
 
 model Employee {
-  id               String         @id
+  id               String         @id // ID del sistema legado, ej: "EMP-2941". Requerido al crear.
   firstName        String
   lastName         String
   department       String
@@ -101,11 +101,11 @@ enum RequestState {
 }
 
 enum DocumentCategory {
-  Identidad
-  Academico
-  Contractual
-  Medico
-  Legales
+  IDENTIDAD
+  ACADEMICO
+  CONTRACTUAL
+  MEDICO
+  LEGALES
 }
 
 enum DocumentStatus {
