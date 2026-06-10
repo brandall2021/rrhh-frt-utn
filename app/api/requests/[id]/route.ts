@@ -9,7 +9,13 @@ export async function PUT(
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { state } = await request.json();
+  let state: string;
+  try {
+    const body = await request.json();
+    state = body.state;
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
   try {
     const updated = await updateRequestState(params.id, state);
     if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
