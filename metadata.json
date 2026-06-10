@@ -1,0 +1,6 @@
+{
+  "name": "Precision HR",
+  "description": "Sistema avanzado de control de asistencia, consola de ausencias en tiempo real, legajos digitales de empleados y gestión de solicitudes de licencias.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
