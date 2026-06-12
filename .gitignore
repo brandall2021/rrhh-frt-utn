@@ -10,3 +10,6 @@ coverage/
 # Next.js
 .next/
 out/
+
+# TypeScript build info
+*.tsbuildinfo

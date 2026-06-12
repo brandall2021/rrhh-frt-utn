@@ -138,7 +138,7 @@ export default function PersonalListView({
         </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-400/20 transition-all active:scale-95 cursor-pointer"
+          className="bg-brand hover:bg-brand-hover text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 transition-all active:scale-95 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Nuevo Empleado
@@ -158,7 +158,7 @@ export default function PersonalListView({
               setCurrentPage(1);
             }}
             placeholder="Buscar por nombre, ID o cargo..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all text-slate-100 placeholder-slate-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:ring-1 focus:ring-brand focus:outline-none transition-all text-slate-100 placeholder-slate-500"
           />
         </div>
 
@@ -172,7 +172,7 @@ export default function PersonalListView({
                 setSelectedDept(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none cursor-pointer"
+              className="bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-brand outline-none cursor-pointer"
             >
               {departments.map((dept, i) => (
                 <option key={i} value={dept} className="bg-slate-950 text-white">
@@ -190,7 +190,7 @@ export default function PersonalListView({
                 setSelectedStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none cursor-pointer"
+              className="bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-brand outline-none cursor-pointer"
             >
               <option value="Todos" className="bg-slate-950 text-white">Todos los Estados</option>
               <option value="Activo" className="bg-slate-950 text-white">Activo</option>
@@ -214,7 +214,7 @@ export default function PersonalListView({
 
       {/* Grid count summary */}
       <div className="flex items-center justify-between text-xs text-slate-400">
-        <span>Total: <strong className="text-indigo-400 font-bold">{filteredEmployees.length}</strong> empleados activos e inactivos encontrados</span>
+        <span>Total: <strong className="text-brand-light font-bold">{filteredEmployees.length}</strong> empleados activos e inactivos encontrados</span>
       </div>
 
       {/* Employees Grid list */}
@@ -286,7 +286,7 @@ export default function PersonalListView({
                 <div className="flex gap-2 pt-2 border-t border-slate-850/60">
                   <button
                     onClick={() => onEmployeeClick(emp.id)}
-                    className="flex-1 bg-indigo-600/10 hover:bg-indigo-600 hover:text-white text-indigo-400 border border-indigo-500/20 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center"
+                    className="flex-1 bg-brand/10 hover:bg-brand hover:text-white text-brand-light border border-brand/20 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center"
                   >
                     Ver Perfil / Legajo
                   </button>
@@ -323,7 +323,7 @@ export default function PersonalListView({
                onClick={() => setCurrentPage(i + 1)}
                className={`w-6 h-6 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
                  currentPage === i + 1
-                   ? "bg-indigo-600 text-white border-transparent"
+                   ? "bg-brand text-white border-transparent"
                    : "border-slate-800 text-slate-400 hover:bg-slate-800"
                }`}
             >
@@ -370,7 +370,7 @@ export default function PersonalListView({
                     value={newFirstName}
                     onChange={(e) => setNewFirstName(e.target.value)}
                     placeholder="e.g. Alejandro"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-brand focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1 text-left">
@@ -381,7 +381,7 @@ export default function PersonalListView({
                     value={newLastName}
                     onChange={(e) => setNewLastName(e.target.value)}
                     placeholder="e.g. Martínez"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-brand focus:outline-none"
                   />
                 </div>
               </div>
@@ -394,7 +394,7 @@ export default function PersonalListView({
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
                   placeholder="e.g. Senior Frontend Engineer"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-brand focus:outline-none"
                 />
               </div>
 
@@ -404,7 +404,7 @@ export default function PersonalListView({
                   <select
                     value={newDept}
                     onChange={(e) => setNewDept(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:outline-none"
                   >
                     <option value="IT & Desarrollo" className="bg-slate-955 text-white">IT & Desarrollo</option>
                     <option value="Recursos Humanos" className="bg-slate-955 text-white">Recursos Humanos</option>
@@ -422,7 +422,7 @@ export default function PersonalListView({
                     value={newCuil}
                     onChange={(e) => setNewCUIL(e.target.value)}
                     placeholder="20-12345678-9"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-indigo-500 focus:outline-none focus:border-transparent font-mono"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-brand focus:outline-none focus:border-transparent font-mono"
                   />
                 </div>
               </div>
@@ -435,7 +435,7 @@ export default function PersonalListView({
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="e.g. user@precisionhr.com"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-brand outline-none"
                   />
                 </div>
                 <div className="space-y-1 text-left">
@@ -445,7 +445,7 @@ export default function PersonalListView({
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     placeholder="+54 11 0000-0000"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-650 focus:ring-1 focus:ring-brand outline-none"
                   />
                 </div>
               </div>
@@ -461,7 +461,7 @@ export default function PersonalListView({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-505 text-white rounded-xl py-2 text-xs font-semibold hover:bg-indigo-500 transition-all cursor-pointer border border-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                  className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-2 text-xs font-semibold hover:bg-brand transition-all cursor-pointer border border-brand/10 shadow-[0_0_15px_rgba(214, 0, 0,0.2)]"
                 >
                   Subir Legajo
                 </button>

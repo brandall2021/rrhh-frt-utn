@@ -30,7 +30,7 @@ export function getNovedadBadgeStyles(type: NovedadType) {
     case NovedadType.ESTUDIO:
       return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
     case NovedadType.PARTICULAR:
-      return "bg-indigo-500/10 text-indigo-400 border-indigo-500/30";
+      return "bg-brand/10 text-brand-light border-brand/30";
     case NovedadType.ENFERMEDAD:
     case NovedadType.MEDICA:
       return "bg-rose-500/10 text-rose-400 border-rose-500/30";
@@ -133,7 +133,7 @@ export default function DashboardView({
         </div>
         <button
           onClick={onNewRequestClick}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-400/20 transition-all active:scale-95 cursor-pointer"
+          className="bg-brand hover:bg-brand-hover text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 transition-all active:scale-95 cursor-pointer"
         >
           <span className="text-[15px] font-bold">+</span>
           Nueva Novedad
@@ -146,7 +146,7 @@ export default function DashboardView({
         <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl flex flex-col justify-between hover:border-slate-700/60 transition-all">
           <div className="flex justify-between items-start">
             <span className="text-xs font-semibold text-slate-400">Pendientes</span>
-            <Clock className="w-4 h-4 text-indigo-400" />
+            <Clock className="w-4 h-4 text-brand-light" />
           </div>
           <div className="mt-3">
             <span className="text-3xl font-extrabold text-white">
@@ -200,7 +200,7 @@ export default function DashboardView({
         </div>
 
         {/* Metric 4 - Outstanding Bento Hero Block */}
-        <div className="bg-indigo-600 rounded-3xl p-5 text-white shadow-[0_0_20px_rgba(99,102,241,0.35)] flex flex-col justify-between border border-indigo-400/20 transition-all hover:scale-[1.01]">
+        <div className="bg-brand rounded-3xl p-5 text-white shadow-[0_0_20px_rgba(214, 0, 0,0.35)] flex flex-col justify-between border border-brand-light/20 transition-all hover:scale-[1.01]">
           <div className="flex justify-between items-start">
             <span className="text-xs font-semibold uppercase tracking-wider opacity-85">Este Mes</span>
             <Calendar className="w-4 h-4 text-white" />
@@ -228,13 +228,13 @@ export default function DashboardView({
             <div className="flex gap-1.5">
               <button
                 onClick={() => alert("Función de filtrado avanzado de novedades.")}
-                className="p-2 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+                className="p-2 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
               >
                 <Filter className="w-4 h-4" />
               </button>
               <button
                 onClick={() => alert("Reporte de asistencia (.CSV) preparado para descarga.")}
-                className="p-2 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+                className="p-2 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -281,7 +281,7 @@ export default function DashboardView({
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => onEmployeeClick(req.employeeId)}
-                              className="w-9 h-9 bg-slate-800 text-slate-200 border border-slate-705 flex items-center justify-center rounded-xl font-bold text-xs shrink-0 cursor-pointer hover:bg-indigo-600 hover:text-white transition-all hover:border-transparent"
+                              className="w-9 h-9 bg-slate-800 text-slate-200 border border-slate-705 flex items-center justify-center rounded-xl font-bold text-xs shrink-0 cursor-pointer hover:bg-brand hover:text-white transition-all hover:border-transparent"
                             >
                               {req.employeeName
                                 .split(" ")
@@ -291,7 +291,7 @@ export default function DashboardView({
                             <div className="text-left">
                               <p
                                 onClick={() => onEmployeeClick(req.employeeId)}
-                                className="text-xs font-bold text-slate-200 leading-none hover:underline cursor-pointer hover:text-indigo-400"
+                                className="text-xs font-bold text-slate-200 leading-none hover:underline cursor-pointer hover:text-brand-light"
                               >
                                 {req.employeeName}
                               </p>
@@ -334,7 +334,7 @@ export default function DashboardView({
                                   setCurrentPage((p) => p - 1);
                                 }
                               }}
-                              className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition-all border border-indigo-500/40 active:scale-95 shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                              className="bg-brand hover:bg-brand-hover text-white px-3 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition-all border border-brand/40 active:scale-95 shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
                             >
                               Aprobar
                             </button>
@@ -369,7 +369,7 @@ export default function DashboardView({
                   onClick={() => setCurrentPage(i + 1)}
                   className={`w-6 h-6 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
                     currentPage === i + 1
-                      ? "bg-indigo-600 text-white border-transparent"
+                      ? "bg-brand text-white border-transparent"
                       : "border-slate-800 text-slate-400 hover:bg-slate-800"
                   }`}
                 >
@@ -423,7 +423,7 @@ export default function DashboardView({
                             child.type === NovedadType.ESTUDIO
                               ? "bg-emerald-500"
                               : child.type === NovedadType.PARTICULAR
-                              ? "bg-indigo-500"
+                              ? "bg-brand"
                               : "bg-purple-500"
                           }`}
                         ></div>
@@ -440,7 +440,7 @@ export default function DashboardView({
                   <div className="mt-3 pt-2 text-center border-t border-slate-800/60">
                     <button
                       onClick={() => alert("Correlación de superposición proyectada en calendario de equipo.")}
-                      className="text-indigo-400 hover:text-indigo-300 text-[10px] font-bold tracking-tight hover:underline cursor-pointer"
+                      className="text-brand-light hover:text-brand-lighter text-[10px] font-bold tracking-tight hover:underline cursor-pointer"
                     >
                       Superposición de calendario
                     </button>
@@ -505,10 +505,10 @@ export default function DashboardView({
                         ? hasEvent.type === NovedadType.ESTUDIO
                           ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
                           : hasEvent.type === NovedadType.PARTICULAR
-                          ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400"
+                          ? "bg-brand/10 border-brand/30 text-brand-light"
                           : "bg-rose-500/10 border-rose-500/30 text-rose-400"
                         : "border-transparent text-slate-300 hover:bg-slate-800/60"
-                    } ${selectedCalendarDay === dayNum ? "ring-2 ring-indigo-500" : ""}`}
+                    } ${selectedCalendarDay === dayNum ? "ring-2 ring-brand" : ""}`}
                   >
                     <span>{dayNum}</span>
                     {hasEvent && (

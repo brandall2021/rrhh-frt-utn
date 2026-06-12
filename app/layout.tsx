@@ -3,8 +3,8 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Precision HR - Gestión de RRHH",
-  description: "Sistema de control de asistencia y gestión de personal",
+  title: "FACE UNT - Gestión de RRHH",
+  description: "Sistema de control de asistencia y gestión de personal - Facultad de Ciencias Económicas UNT",
 };
 
 export default function RootLayout({

@@ -61,12 +61,12 @@ export default function SettingsView({ departments, onCreate, onUpdate, onToggle
       <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-indigo-400" />
+            <Building2 className="w-4 h-4 text-brand-light" />
             <h2 className="text-xs font-bold text-white">Departamentos</h2>
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            className="bg-brand hover:bg-brand-hover text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             Nuevo
@@ -90,7 +90,7 @@ export default function SettingsView({ departments, onCreate, onUpdate, onToggle
                       <input
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
-                        className="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs w-48 focus:outline-none focus:border-indigo-500"
+                        className="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs w-48 focus:outline-none focus:border-brand"
                         autoFocus
                       />
                     ) : (
@@ -129,7 +129,7 @@ export default function SettingsView({ departments, onCreate, onUpdate, onToggle
                         <>
                           <button
                             onClick={() => handleEdit(dept)}
-                            className="p-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-400 hover:text-white rounded-lg cursor-pointer transition-all"
+                            className="p-1.5 bg-slate-800 hover:bg-brand text-slate-400 hover:text-white rounded-lg cursor-pointer transition-all"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
@@ -169,7 +169,7 @@ export default function SettingsView({ departments, onCreate, onUpdate, onToggle
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Nombre del departamento"
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 placeholder-slate-500"
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand placeholder-slate-500"
                   autoFocus
                 />
                 <div className="flex gap-2 justify-end">
@@ -183,7 +183,7 @@ export default function SettingsView({ departments, onCreate, onUpdate, onToggle
                   <button
                     type="submit"
                     disabled={creating}
-                    className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl cursor-pointer transition-all disabled:opacity-50"
+                    className="px-4 py-2 text-xs font-bold text-white bg-brand hover:bg-brand-hover rounded-xl cursor-pointer transition-all disabled:opacity-50"
                   >
                     {creating ? "Creando..." : "Crear"}
                   </button>

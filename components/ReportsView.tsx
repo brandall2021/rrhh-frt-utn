@@ -82,7 +82,7 @@ export default function ReportsView() {
               onClick={() => setActiveReportYear(y)}
               className={`px-3 py-1.5 border text-xs font-semibold rounded-lg cursor-pointer transition-all ${
                 activeReportYear === y
-                  ? "bg-indigo-600 text-white border-transparent shadow-[0_0_10px_rgba(99,102,241,0.3)]"
+                  ? "bg-brand text-white border-transparent shadow-[0_0_10px_rgba(214, 0, 0,0.3)]"
                   : "border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white"
               }`}
             >
@@ -104,7 +104,7 @@ export default function ReportsView() {
             ? "bg-slate-900/50 border-slate-800"
             : "bg-slate-900/50 border-slate-800";
           const bentoText = i === 0
-            ? "text-indigo-400"
+            ? "text-brand-light"
             : i === 1
             ? "text-rose-400"
             : i === 2
@@ -144,7 +144,7 @@ export default function ReportsView() {
             {/* Color keys legend */}
             <div className="hidden sm:flex gap-3 text-[10px] font-semibold text-slate-400">
               <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500"></span>Particular
+                <span className="w-2.5 h-2.5 rounded-sm bg-brand"></span>Particular
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-sm bg-rose-500"></span>Médica
@@ -203,7 +203,7 @@ export default function ReportsView() {
                             <span className="text-slate-400">Estudio:</span> <strong>{stat.estudio}d</strong>
                           </p>
                         </div>
-                        <div className="border-t border-slate-800 pt-1 mt-1 text-right text-indigo-400 font-bold text-[11px]">
+                        <div className="border-t border-slate-800 pt-1 mt-1 text-right text-brand-light font-bold text-[11px]">
                           Total: {totalDays} días
                         </div>
                       </motion.div>
@@ -215,7 +215,7 @@ export default function ReportsView() {
                     className="w-full flex flex-col rounded-t-lg overflow-hidden transition-all group-hover:opacity-90 bg-slate-950/70"
                     style={{ height: `${heightPercent}%` }}
                   >
-                    <div style={{ height: `${partPct}%` }} className="bg-indigo-500 w-full" title="Particular"></div>
+                    <div style={{ height: `${partPct}%` }} className="bg-brand w-full" title="Particular"></div>
                     <div style={{ height: `${enfPct}%` }} className="bg-rose-500 w-full" title="Médica"></div>
                     <div style={{ height: `${compPct}%` }} className="bg-purple-500 w-full" title="Compensatorio"></div>
                     <div style={{ height: `${estPct}%` }} className="bg-emerald-500 w-full" title="Estudio"></div>
@@ -231,10 +231,10 @@ export default function ReportsView() {
           </div>
 
           {/* Bullet Highlight Info below chart */}
-          <div className="mt-5 p-4 bg-indigo-950/10 border border-indigo-500/20 rounded-2xl flex items-start gap-3">
-            <TrendingUp className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+          <div className="mt-5 p-4 bg-brand/10 border border-brand/20 rounded-2xl flex items-start gap-3">
+            <TrendingUp className="w-4 h-4 text-brand-light mt-0.5 shrink-0" />
             <p className="text-xs text-slate-300 leading-relaxed">
-              <strong>Dato destacado:</strong> El mes de **Marzo** registró el pico más alto de licencias, superando en un 15% el promedio anual corporativo de Precision HR.
+              <strong>Dato destacado:</strong> El mes de **Marzo** registró el pico más alto de licencias, superando en un 15% el promedio anual del sistema.
             </p>
           </div>
         </section>
@@ -270,7 +270,7 @@ export default function ReportsView() {
                         : i === 1
                         ? "bg-amber-500"
                         : i === 2
-                        ? "bg-indigo-500"
+                        ? "bg-brand"
                         : "bg-purple-500"
                     }`}
                     style={{ width: `${r.progress}%` }}
@@ -287,7 +287,7 @@ export default function ReportsView() {
           <div className="pt-4 border-t border-slate-800 text-center">
             <button
               onClick={() => alert("Mostrando listado unificado de métricas de presentismo anual...")}
-              className="text-indigo-400 text-[11px] font-bold tracking-tight hover:underline flex items-center justify-center gap-1.5 w-full cursor-pointer hover:text-indigo-300"
+              className="text-brand-light text-[11px] font-bold tracking-tight hover:underline flex items-center justify-center gap-1.5 w-full cursor-pointer hover:text-brand-lighter"
             >
               Ver reporte unificado completo
               <ArrowRight className="w-3.5 h-3.5" />

@@ -4,6 +4,11 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-brand: #D60000;
+  --color-brand-hover: #B30000;
+  --color-brand-light: #E02B20;
+  --color-brand-lighter: #FF4444;
+  --color-brand-muted: rgba(214, 0, 0, 0.1);
 }
 
 /* Custom Scrollbars suited for Bento Theme */

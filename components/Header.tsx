@@ -25,11 +25,13 @@ export default function Header({
       {/* Brand Logo and Title */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange("dashboard")}>
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs font-mono shadow-[0_0_10px_rgba(99,102,241,0.4)] border border-indigo-400/20">
-            LB
-          </div>
-          <span className="text-[17px] font-bold tracking-tight text-white font-sans antialiased hover:text-indigo-400 transition-colors">
-            Precision HR
+          <img
+            src="/images/logo-face-white.png"
+            alt="FACE - UNT"
+            className="h-7 w-auto object-contain"
+          />
+          <span className="text-[17px] font-bold tracking-tight text-white font-sans antialiased hover:text-brand-light transition-colors">
+            FACE · UNT
           </span>
         </div>
 
@@ -39,7 +41,7 @@ export default function Header({
             onClick={() => onViewChange("dashboard")}
             className={`font-semibold text-xs tracking-wide px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
               currentView === "dashboard"
-                ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-bold"
+                ? "bg-brand/10 text-brand-light border border-brand/30 font-bold"
                 : "text-slate-400 hover:text-white hover:bg-slate-900/50"
             }`}
           >
@@ -51,7 +53,7 @@ export default function Header({
             onClick={() => onViewChange("personal")}
             className={`font-semibold text-xs tracking-wide px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
               currentView === "personal"
-                ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-bold"
+                ? "bg-brand/10 text-brand-light border border-brand/30 font-bold"
                 : "text-slate-400 hover:text-white hover:bg-slate-900/50"
             }`}
           >
@@ -63,7 +65,7 @@ export default function Header({
             onClick={() => onViewChange("reports")}
             className={`font-semibold text-xs tracking-wide px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
               currentView === "reports"
-                ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-bold"
+                ? "bg-brand/10 text-brand-light border border-brand/30 font-bold"
                 : "text-slate-400 hover:text-white hover:bg-slate-900/50"
             }`}
           >
@@ -83,14 +85,14 @@ export default function Header({
             placeholder="Buscar..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 pr-4 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs w-52 md:w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all text-slate-100 placeholder-slate-500"
+            className="pl-9 pr-4 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs w-52 md:w-64 focus:outline-none focus:ring-1 focus:ring-brand focus:border-transparent transition-all text-slate-100 placeholder-slate-500"
           />
         </div>
 
         {/* Action Widgets */}
         <button
           onClick={() => alert("Central de novedades: No hay alertas pendientes.")}
-          className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-indigo-400 transition-colors relative cursor-pointer"
+          className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-brand-light transition-colors relative cursor-pointer"
         >
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
@@ -98,7 +100,7 @@ export default function Header({
 
         <button
           onClick={() => alert("Configuraciones del panel de recursos humanos.")}
-          className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer"
+          className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
         >
           <Settings className="w-4 h-4" />
         </button>
@@ -117,8 +119,8 @@ export default function Header({
             <p className="text-xs font-semibold leading-none text-slate-200">
               Luis Batallan
             </p>
-            <p className="text-[10px] text-indigo-400 mt-0.5 leading-none font-semibold">
-              HR Manager
+            <p className="text-[10px] text-brand-light mt-0.5 leading-none font-semibold">
+              Administrador
             </p>
           </div>
         </div>

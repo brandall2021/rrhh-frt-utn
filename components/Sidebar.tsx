@@ -31,14 +31,16 @@ export default function Sidebar({
       {/* Admin Panel Profile */}
       <div className="px-5 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm tracking-wide shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-500/20">
-            HR
-          </div>
+          <img
+            src="/images/logo-face-white.png"
+            alt="FACE - UNT"
+            className="h-7 w-auto object-contain"
+          />
           <div>
             <p className="font-semibold text-sm text-slate-100 leading-tight">
               Gestión Operativa
             </p>
-            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
+            <p className="text-[10px] text-brand-light font-bold uppercase tracking-wider">
               Administrador
             </p>
           </div>
@@ -47,7 +49,7 @@ export default function Sidebar({
         {/* Global Action Button */}
         <button
           onClick={onNewRequestClick}
-          className="w-full mt-5 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-400/20 cursor-pointer"
+          className="w-full mt-5 bg-brand hover:bg-brand-hover text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Nueva Novedad
@@ -60,7 +62,7 @@ export default function Sidebar({
           onClick={() => onViewChange("dashboard")}
           className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
             currentView === "dashboard"
-              ? "bg-indigo-600 text-white border-indigo-500/30 font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+              ? "bg-brand text-white border-brand/30 font-bold shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
               : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
           }`}
         >
@@ -72,7 +74,7 @@ export default function Sidebar({
           onClick={() => onViewChange("personal")}
           className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
             currentView === "personal"
-              ? "bg-indigo-600 text-white border-indigo-500/30 font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+              ? "bg-brand text-white border-brand/30 font-bold shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
               : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
           }`}
         >
@@ -84,7 +86,7 @@ export default function Sidebar({
           onClick={() => onViewChange("reports")}
           className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
             currentView === "reports"
-              ? "bg-indigo-600 text-white border-indigo-500/30 font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+              ? "bg-brand text-white border-brand/30 font-bold shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
               : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
           }`}
         >
@@ -96,7 +98,7 @@ export default function Sidebar({
           onClick={() => onViewChange("settings")}
           className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
             currentView === "settings"
-              ? "bg-indigo-600 text-white border-indigo-500/30 font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+              ? "bg-brand text-white border-brand/30 font-bold shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
               : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
           }`}
         >
@@ -108,8 +110,8 @@ export default function Sidebar({
       {/* Footer Support/Operations */}
       <div className="px-3 pt-4 border-t border-slate-900 space-y-1">
         <button
-          onClick={() => alert("Soporte Técnico de Precision HR - Central de Ayuda activa.")}
-          className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-900/50 text-slate-400 hover:text-indigo-400 rounded-xl text-xs font-medium transition-all cursor-pointer"
+          onClick={() => alert("Soporte Técnico FACE UNT - Central de Ayuda activa.")}
+          className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-900/50 text-slate-400 hover:text-brand-light rounded-xl text-xs font-medium transition-all cursor-pointer"
         >
           <HelpCircle className="w-4 h-4" />
           <span>Ayuda</span>

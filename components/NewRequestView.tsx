@@ -122,7 +122,7 @@ export default function NewRequestView({
       <div className="flex items-center gap-3">
         <button
           onClick={onBackClick}
-          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-400 transition-all cursor-pointer"
+          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-brand-light transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
@@ -154,7 +154,7 @@ export default function NewRequestView({
                 <select
                   value={selectedEmployeeId}
                   onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 focus:ring-1 focus:ring-indigo-500 focus:outline-none appearance-none cursor-pointer"
+                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 focus:ring-1 focus:ring-brand focus:outline-none appearance-none cursor-pointer"
                 >
                   {employees.map((emp) => (
                     <option key={emp.id} value={emp.id} className="bg-slate-900 text-slate-100">
@@ -180,14 +180,14 @@ export default function NewRequestView({
                     onClick={() => setSelectedType(opt.type)}
                     className={`p-3.5 border rounded-2xl text-left cursor-pointer transition-all ${
                       selectedType === opt.type
-                        ? "border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500"
-                        : "border-slate-800 bg-slate-950 hover:border-slate-705 hover:bg-slate-900/40"
+                       ? "border-brand bg-brand/5 ring-1 ring-brand"
+                       : "border-slate-800 bg-slate-950 hover:border-slate-705 hover:bg-slate-900/40"
                     }`}
                   >
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold text-slate-200">{opt.label}</span>
                       {selectedType === opt.type && (
-                        <div className="w-4 h-4 bg-indigo-500 text-white rounded-full flex items-center justify-center">
+                         <div className="w-4 h-4 bg-brand text-white rounded-full flex items-center justify-center">
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -210,29 +210,29 @@ export default function NewRequestView({
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                  />
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 focus:ring-1 focus:ring-brand focus:outline-none"
+                   />
+                 </div>
+               </div>
+
+               <div className="space-y-1.5">
+                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                   Fecha Hasta *
+                 </label>
+                 <div className="relative">
+                   <input
+                     type="date"
+                     required
+                     value={endDate}
+                     onChange={(e) => setEndDate(e.target.value)}
+                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 focus:ring-1 focus:ring-brand focus:outline-none"
+                   />
+                 </div>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Fecha Hasta *
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    required
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Drag and Drop Zone file upload */}
-            <div className="space-y-2">
+              {/* Drag and Drop Zone file upload */}
+              <div className="space-y-2">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Adjuntar Comprobante (Certificados, constancias u orden de citación)
               </label>
@@ -244,8 +244,8 @@ export default function NewRequestView({
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-2xl p-6 text-center select-none transition-colors relative ${
                   isDragActive
-                    ? "border-indigo-500 bg-indigo-500/5"
-                    : "border-slate-800 hover:border-indigo-500 bg-slate-950"
+                    ? "border-brand bg-brand/5"
+                    : "border-slate-800 hover:border-brand bg-slate-950"
                 }`}
               >
                 <input
@@ -262,7 +262,7 @@ export default function NewRequestView({
                     Arraste y suelta tu archivo o{" "}
                     <label
                       htmlFor="request-file-input"
-                      className="text-indigo-400 hover:underline cursor-pointer font-bold inline"
+                       className="text-brand-light hover:underline cursor-pointer font-bold inline"
                     >
                       haz clic aquí para explorar en tu equipo
                     </label>
@@ -299,7 +299,7 @@ export default function NewRequestView({
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
                 placeholder="Detalle el motivo específico de su solicitud aquí..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:ring-1 focus:ring-brand focus:outline-none leading-relaxed"
               ></textarea>
             </div>
 
@@ -314,7 +314,7 @@ export default function NewRequestView({
               </button>
               <button
                 type="submit"
-                className="flex-1 bg-indigo-600 hover:bg-indigo-505 text-white rounded-xl py-2.5 text-xs font-semibold text-center transition-opacity cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                 className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-2.5 text-xs font-semibold text-center transition-opacity cursor-pointer shadow-[0_0_15px_rgba(214,0,0,0.2)]"
               >
                 Enviar Solicitud
               </button>
@@ -336,8 +336,8 @@ export default function NewRequestView({
 
           <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl space-y-3">
             <h4 className="font-bold text-xs text-white flex items-center gap-1.5 leading-none">
-              <Info className="w-3.5 h-3.5 text-indigo-400" />
-              Políticas de Precision HR
+               <Info className="w-3.5 h-3.5 text-brand-light" />
+               Políticas del Sistema
             </h4>
             <ul className="space-y-1.5 text-[11px] text-slate-350 list-disc list-inside text-slate-300">
               <li>El certificado médico debe cargarse en un lapso no mayor a 48 hs de iniciada la solicitud.</li>

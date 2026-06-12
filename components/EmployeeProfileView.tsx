@@ -267,7 +267,7 @@ export default function EmployeeProfileView({
       <div className="flex items-center gap-3">
         <button
           onClick={onBackClick}
-          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-400 transition-all cursor-pointer"
+          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-brand-light transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
@@ -300,7 +300,7 @@ export default function EmployeeProfileView({
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                {employee.role} • <strong className="text-indigo-400">{employee.department}</strong>
+                {employee.role} • <strong className="text-brand-light">{employee.department}</strong>
               </p>
               <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase tracking-tight">
                 Legajo: #{employee.id} | CUIL: {employee.cuil}
@@ -329,21 +329,21 @@ export default function EmployeeProfileView({
               <>
                 <button
                   onClick={() => setIsUploadModalOpen(true)}
-                  className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-indigo-400 hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-brand-light hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <UploadCloud className="w-3.5 h-3.5" />
                   Subir Documento
                 </button>
                 <button
                   onClick={handleDownloadFullZip}
-                  className="flex-1 md:flex-initial bg-indigo-600 hover:bg-indigo-505 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.2)] border border-indigo-500/20"
+                  className="flex-1 md:flex-initial bg-brand hover:bg-brand-hover text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(214, 0, 0,0.2)] border border-brand/20"
                 >
                   <Download className="w-3.5 h-3.5" />
                   Descargar Legajo completo
                 </button>
                 <button
                   onClick={() => setEditing(true)}
-                  className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-indigo-400 hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-brand-light hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Editar perfil
                 </button>
@@ -379,7 +379,7 @@ export default function EmployeeProfileView({
           onClick={() => setActiveTab("documentos")}
           className={`px-4 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap px-4 py-2 ${
             activeTab === "documentos"
-              ? "border-indigo-500 text-indigo-400 bg-indigo-500/5"
+              ? "border-brand text-brand-light bg-brand/5"
               : "border-transparent text-slate-400 hover:text-white"
           }`}
         >
@@ -390,7 +390,7 @@ export default function EmployeeProfileView({
           onClick={() => setActiveTab("personal")}
           className={`px-4 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap px-4 py-2 ${
             activeTab === "personal"
-              ? "border-indigo-500 text-indigo-400 bg-indigo-500/5"
+              ? "border-brand text-brand-light bg-brand/5"
               : "border-transparent text-slate-400 hover:text-white"
           }`}
         >
@@ -401,7 +401,7 @@ export default function EmployeeProfileView({
           onClick={() => setActiveTab("contacto")}
           className={`px-4 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap px-4 py-2 ${
             activeTab === "contacto"
-              ? "border-indigo-500 text-indigo-400 bg-indigo-500/5"
+              ? "border-brand text-brand-light bg-brand/5"
               : "border-transparent text-slate-400 hover:text-white"
           }`}
         >
@@ -412,7 +412,7 @@ export default function EmployeeProfileView({
           onClick={() => setActiveTab("laboral")}
           className={`px-4 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap px-4 py-2 ${
             activeTab === "laboral"
-              ? "border-indigo-500 text-indigo-400 bg-indigo-500/5"
+              ? "border-brand text-brand-light bg-brand/5"
               : "border-transparent text-slate-400 hover:text-white"
           }`}
         >
@@ -435,11 +435,11 @@ export default function EmployeeProfileView({
               >
                 {/* Simulated upload progress loader bar */}
                 {isUploading && (
-                  <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3 text-xs text-left animate-pulse">
-                    <p className="font-semibold text-indigo-400">Subiendo y encriptando archivo...</p>
+                  <div className="bg-brand/15 border border-brand/20 rounded-xl p-3 text-xs text-left animate-pulse">
+                    <p className="font-semibold text-brand-light">Subiendo y encriptando archivo...</p>
                     <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden mt-2">
                       <div
-                        className="bg-indigo-500 h-full rounded-full transition-all duration-100"
+                        className="bg-brand h-full rounded-full transition-all duration-100"
                         style={{ width: `${uploadProgress}%` }}
                       ></div>
                     </div>
@@ -503,7 +503,7 @@ export default function EmployeeProfileView({
                                   href={`/api/uploads/${doc.fileName}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-[10px] font-bold text-indigo-400 hover:underline px-2 py-1 hover:bg-slate-800 rounded cursor-pointer"
+                                  className="text-[10px] font-bold text-brand-light hover:underline px-2 py-1 hover:bg-slate-800 rounded cursor-pointer"
                                 >
                                   Ver
                                 </a>
@@ -583,7 +583,7 @@ export default function EmployeeProfileView({
                           ) : (
                             <button
                               onClick={() => handleSignPaySlip(ps)}
-                              className="bg-indigo-600 hover:bg-indigo-505 shadow-[0_4px_10px_rgba(99,102,241,0.25)] text-white text-[10px] font-bold py-1 px-3 rounded cursor-pointer transition-colors"
+                              className="bg-brand hover:bg-brand-hover shadow-[0_4px_10px_rgba(214, 0, 0,0.25)] text-white text-[10px] font-bold py-1 px-3 rounded cursor-pointer transition-colors"
                             >
                               Firmar Digital
                             </button>
@@ -610,42 +610,42 @@ export default function EmployeeProfileView({
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Nombre</label>
                       <input value={formData.firstName} onChange={e => setFormData(p => ({ ...p, firstName: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Apellido</label>
                       <input value={formData.lastName} onChange={e => setFormData(p => ({ ...p, lastName: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">CUIL / CUIT</label>
                       <input value={formData.cuil} onChange={e => setFormData(p => ({ ...p, cuil: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Fecha de Nacimiento</label>
                       <input type="date" value={formData.birthDate} onChange={e => setFormData(p => ({ ...p, birthDate: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estado Civil</label>
                       <input value={formData.maritalStatus} onChange={e => setFormData(p => ({ ...p, maritalStatus: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Domicilio</label>
                       <input value={formData.address} onChange={e => setFormData(p => ({ ...p, address: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Email</label>
                       <input type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Teléfono</label>
                       <input value={formData.phone} onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                   </>
                 ) : (
@@ -672,7 +672,7 @@ export default function EmployeeProfileView({
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Personal</p>
-                      <p className="text-sm font-semibold text-indigo-400 mt-0.5 hover:underline cursor-pointer">{employee.email}</p>
+                      <p className="text-sm font-semibold text-brand-light mt-0.5 hover:underline cursor-pointer">{employee.email}</p>
                     </div>
                   </>
                 )}
@@ -694,19 +694,19 @@ export default function EmployeeProfileView({
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Nombre del Contacto</label>
                       <input value={formData.emergencyContact.name}
                         onChange={e => setFormData(p => ({ ...p, emergencyContact: { ...p.emergencyContact, name: e.target.value } }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Parentesco / Relación</label>
                       <input value={formData.emergencyContact.relationship}
                         onChange={e => setFormData(p => ({ ...p, emergencyContact: { ...p.emergencyContact, relationship: e.target.value } }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Teléfono de Urgencia</label>
                       <input value={formData.emergencyContact.phone}
                         onChange={e => setFormData(p => ({ ...p, emergencyContact: { ...p.emergencyContact, phone: e.target.value } }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-brand" />
                     </div>
                   </>
                 ) : (
@@ -721,7 +721,7 @@ export default function EmployeeProfileView({
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Teléfono de Urgencia</p>
-                      <p className="text-sm font-semibold text-indigo-400 font-mono mt-0.5">{employee.emergencyContact.phone}</p>
+                      <p className="text-sm font-semibold text-brand-light font-mono mt-0.5">{employee.emergencyContact.phone}</p>
                     </div>
                   </>
                 )}
@@ -742,29 +742,29 @@ export default function EmployeeProfileView({
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Puesto Actual</label>
                       <input value={formData.role} onChange={e => setFormData(p => ({ ...p, role: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Departamento</label>
                       <select value={formData.departmentId} onChange={e => setFormData(p => ({ ...p, departmentId: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand">
                         {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Fecha de Contratación</label>
                       <input type="date" value={formData.hireDate} onChange={e => setFormData(p => ({ ...p, hireDate: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Fecha de Egreso</label>
                       <input type="date" value={formData.exitDate} onChange={e => setFormData(p => ({ ...p, exitDate: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estado</label>
                       <select value={formData.status} onChange={e => setFormData(p => ({ ...p, status: e.target.value as "ACTIVO" | "INACTIVO" }))}
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand">
                         <option value="ACTIVO">ACTIVO</option>
                         <option value="INACTIVO">INACTIVO</option>
                       </select>
@@ -855,7 +855,7 @@ export default function EmployeeProfileView({
                                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                                 : leave.state === RequestState.RECHAZADO
                                 ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                                : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                                : "bg-brand/10 text-brand-light border-brand/20"
                             }`}
                           >
                             {leave.state}
@@ -880,7 +880,7 @@ export default function EmployeeProfileView({
             <div className="space-y-4">
               {versionHistory.map((v) => (
                 <div key={v.id} className="flex gap-2 text-xs leading-normal">
-                  <div className="h-6 w-1 rounded-full bg-indigo-505 bg-indigo-500 mt-1 shrink-0"></div>
+                  <div className="h-6 w-1 rounded-full bg-brand bg-brand mt-1 shrink-0"></div>
                   <div className="flex-1">
                     <p className="font-bold text-slate-200 leading-snug">{v.title}</p>
                     <p className="text-[10px] text-slate-400 mt-0.5">{v.detail}</p>
@@ -892,8 +892,8 @@ export default function EmployeeProfileView({
           </div>
 
           {/* Secure vault advisory */}
-          <div className="bg-indigo-950/20 border border-indigo-500/20 p-4 rounded-3xl space-y-2">
-            <h4 className="text-indigo-400 font-bold text-xs flex items-center gap-1.5 leading-none">
+          <div className="bg-brand/10 border border-brand/20 p-4 rounded-3xl space-y-2">
+            <h4 className="text-brand-light font-bold text-xs flex items-center gap-1.5 leading-none">
               <Lock className="w-3.5 h-3.5" />
               Bóveda Digital Encriptada
             </h4>
@@ -914,7 +914,7 @@ export default function EmployeeProfileView({
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <UploadCloud className="w-4 h-4 text-indigo-400" />
+                <UploadCloud className="w-4 h-4 text-brand-light" />
                 Subir Documento
               </h3>
               <button onClick={() => setIsUploadModalOpen(false)} className="p-1 hover:bg-slate-800 rounded-lg cursor-pointer">
@@ -928,7 +928,7 @@ export default function EmployeeProfileView({
                   value={uploadDocName}
                   onChange={e => setUploadDocName(e.target.value)}
                   placeholder="Ej: DNI Frente"
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 placeholder-slate-500"
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand placeholder-slate-500"
                   required
                 />
               </div>
@@ -937,7 +937,7 @@ export default function EmployeeProfileView({
                 <select
                   value={uploadCategory}
                   onChange={e => setUploadCategory(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand"
                 >
                   <option>Identidad</option>
                   <option>Académico</option>
@@ -952,7 +952,7 @@ export default function EmployeeProfileView({
                   type="date"
                   value={uploadExpiryDate}
                   onChange={e => setUploadExpiryDate(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand"
                 />
               </div>
               <div>
@@ -961,7 +961,7 @@ export default function EmployeeProfileView({
                   type="file"
                   accept=".pdf,.png,.jpg,.jpeg"
                   onChange={e => setUploadFile(e.target.files?.[0] ?? null)}
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:bg-indigo-600 file:text-white file:text-xs file:cursor-pointer"
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:bg-brand file:text-white file:text-xs file:cursor-pointer"
                   required
                 />
               </div>
@@ -976,7 +976,7 @@ export default function EmployeeProfileView({
                 <button
                   type="submit"
                   disabled={uploadingReal}
-                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-bold text-white bg-brand hover:bg-brand-hover rounded-xl cursor-pointer disabled:opacity-50"
                 >
                   {uploadingReal ? "Subiendo..." : "Subir"}
                 </button>
@@ -996,7 +996,7 @@ export default function EmployeeProfileView({
           >
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Lock className="w-4 h-4 text-indigo-400" />
+                <Lock className="w-4 h-4 text-brand-light" />
                 Firmar Recibo - {selectedPaySlipToSign.period}
               </h3>
               <button
@@ -1024,7 +1024,7 @@ export default function EmployeeProfileView({
                   value={signingPin}
                   onChange={(e) => setSigningPin(e.target.value.replace(/\D/g, ""))}
                   placeholder="••••"
-                  className="w-full text-center tracking-[0.5em] bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm font-bold focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-100"
+                  className="w-full text-center tracking-[0.5em] bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm font-bold focus:ring-1 focus:ring-brand focus:outline-none text-slate-100"
                 />
               </div>
 
@@ -1039,7 +1039,7 @@ export default function EmployeeProfileView({
                 <button
                   type="submit"
                   disabled={isSigningInProcess}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 text-xs font-semibold cursor-pointer disabled:opacity-50 shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                  className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-2 text-xs font-semibold cursor-pointer disabled:opacity-50 shadow-[0_0_15px_rgba(214, 0, 0,0.2)]"
                 >
                   {isSigningInProcess ? "Firmando..." : "Confirmar Firma"}
                 </button>
