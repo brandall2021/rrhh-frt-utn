@@ -2,7 +2,7 @@ import { prisma } from "./db";
 import type { RequestState } from "@prisma/client";
 
 export async function getRequests(filters?: { state?: RequestState; employeeId?: string }) {
-  return prisma.leaveRequest.findMany({
+  const records = await prisma.leaveRequest.findMany({
     where: {
       ...(filters?.state && { state: filters.state }),
       ...(filters?.employeeId && { employeeId: filters.employeeId }),
@@ -12,6 +12,21 @@ export async function getRequests(filters?: { state?: RequestState; employeeId?:
     },
     orderBy: { submissionDate: "desc" },
   });
+
+  return records.map((r) => ({
+    id: r.id,
+    employeeId: r.employeeId,
+    employeeName: `${r.employee.firstName} ${r.employee.lastName}`,
+    department: r.employee.department,
+    type: r.type,
+    startDate: r.startDate.toISOString().slice(0, 10),
+    endDate: r.endDate.toISOString().slice(0, 10),
+    days: r.days,
+    state: r.state,
+    observations: r.observations ?? undefined,
+    attachedFile: r.attachedFile ?? undefined,
+    submissionDate: r.submissionDate.toISOString().slice(0, 10),
+  }));
 }
 
 export async function createRequest(data: {
