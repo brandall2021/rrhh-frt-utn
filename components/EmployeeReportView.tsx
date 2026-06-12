@@ -123,85 +123,48 @@ export default function EmployeeReportView({
     return `${last}${first}`.toUpperCase().substring(0, 2);
   };
 
-  const handleDownloadPDF = async () => {
-    const { default: jsPDF } = await import("jspdf");
-    const html2canvas = (await import("html2canvas")).default;
-
-    const reportEl = document.getElementById("employee-report-content");
-    if (!reportEl) return;
-
-    const canvas = await html2canvas(reportEl, {
-      backgroundColor: "#020617",
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth - 20;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 10;
-
-    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight - 20;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight + 10;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight - 20;
-    }
-
-    pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`);
-  };
-
   return (
     <div className="bg-[#020617] text-slate-200 min-h-screen">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#020617]/90 backdrop-blur-md border-b border-slate-900">
-        <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-3 py-2 md:px-6 md:py-3 flex flex-col gap-2 sm:flex-row sm:items-center justify-between">
+          <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0"
             >
-              <ChevronRight size={14} className="text-brand-light rotate-180" />
-              Volver
+              <ChevronRight size={13} className="text-brand-light rotate-180" />
+              <span className="hidden sm:inline">Volver</span>
             </button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 text-brand-light font-bold flex items-center justify-center border border-brand/20 text-sm">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-slate-900 text-brand-light font-bold flex items-center justify-center border border-brand/20 text-xs md:text-sm shrink-0">
                 {getInitials()}
               </div>
-              <div>
-                <span className="text-[9px] text-brand-light uppercase tracking-widest font-semibold">
-                  Reporte de Asistencias Anual
+              <div className="min-w-0">
+                <span className="text-[8px] md:text-[9px] text-brand-light uppercase tracking-widest font-semibold block leading-tight">
+                  Reporte de Asistencias
                 </span>
-                <h1 className="text-lg font-extrabold text-white leading-tight">
+                <h1 className="text-sm md:text-lg font-extrabold text-white leading-tight truncate">
                   {selectedEmployee.lastName}, {selectedEmployee.firstName}
                 </h1>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 self-end md:self-auto">
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
               <button
                 onClick={() => { setCurrentYear((p) => p - 1); setShowDayModal(false); }}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                className="p-1.5 md:p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
               >
-                <ChevronLeft size={14} />
+                <ChevronLeft size={13} />
               </button>
-              <span className="px-3 font-bold text-brand-light text-sm">{currentYear}</span>
+              <span className="px-2 md:px-3 font-bold text-brand-light text-xs md:text-sm">{currentYear}</span>
               <button
                 onClick={() => { setCurrentYear((p) => p + 1); setShowDayModal(false); }}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                className="p-1.5 md:p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
               >
-                <ChevronRight size={14} />
+                <ChevronRight size={13} />
               </button>
             </div>
 
@@ -211,47 +174,76 @@ export default function EmployeeReportView({
                 setFormEndDate(`${currentYear}-04-04`);
                 setShowEditModal(true);
               }}
-              className="flex items-center gap-2 bg-brand hover:bg-brand-hover text-white px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border border-brand-light/20"
+              className="flex items-center gap-1.5 bg-brand hover:bg-brand-hover text-white px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer border border-brand-light/20"
             >
-              <Edit size={13} />
-              Editar novedades
+              <Edit size={12} />
+              <span className="hidden xs:inline">Editar</span>
+              novedades
             </button>
 
             <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border border-slate-700"
+              onClick={async () => {
+                const { default: jsPDF } = await import("jspdf");
+                const html2canvas = (await import("html2canvas")).default;
+                const reportEl = document.getElementById("employee-report-content");
+                if (!reportEl) return;
+                const canvas = await html2canvas(reportEl, {
+                  backgroundColor: "#020617",
+                  scale: 2,
+                  useCORS: true,
+                  logging: false,
+                });
+                const imgData = canvas.toDataURL("image/png");
+                const pdf = new jsPDF("p", "mm", "a4");
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = pageWidth - 20;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 10;
+                pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight - 20;
+                while (heightLeft > 0) {
+                  position = heightLeft - imgHeight + 10;
+                  pdf.addPage();
+                  pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                  heightLeft -= pageHeight - 20;
+                }
+                pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`);
+              }}
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer border border-slate-700"
             >
-              <Download size={13} />
+              <Download size={12} />
               PDF
             </button>
           </div>
         </div>
       </div>
 
-      <div id="employee-report-content" className="max-w-7xl mx-auto px-4 py-6 md:px-6 space-y-6">
+      <div id="employee-report-content" className="max-w-7xl mx-auto px-3 py-4 md:px-6 md:py-6 space-y-4 md:space-y-6">
         {/* Quick Badges Counters */}
-        <div className="flex flex-wrap items-center gap-2 bg-slate-900/50 border border-slate-800 p-3 rounded-2xl">
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mr-2">
+        <div className="flex flex-wrap items-center gap-1.5 md:gap-2 bg-slate-900/50 border border-slate-800 p-2.5 md:p-3 rounded-xl md:rounded-2xl">
+          <span className="text-[9px] md:text-[10px] text-slate-500 uppercase tracking-widest font-semibold mr-0.5 md:mr-2">
             Resumen:
           </span>
           {absenceTypes.map((type) => {
             const count = statsByType[type.id] || 0;
             const config = COLOR_CONFIGS[type.color as keyof typeof COLOR_CONFIGS] || COLOR_CONFIGS.red;
             return (
-              <div key={type.id} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${config.badgeColor}`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                <span className="text-white">{count}</span>
-                <span className="text-slate-400 font-normal">{type.name}</span>
+              <div key={type.id} className={`flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg border text-[10px] md:text-xs font-semibold ${config.badgeColor}`}>
+                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-current" />
+                <span className="text-white text-[10px] md:text-xs">{count}</span>
+                <span className="text-slate-400 font-normal hidden xs:inline text-[10px] md:text-xs">{type.name}</span>
               </div>
             );
           })}
         </div>
 
         {/* Month Filter Tabs */}
-        <div className="flex flex-wrap gap-1.5 border-b border-slate-800 pb-4">
+        <div className="flex gap-1 border-b border-slate-800 pb-3 md:pb-4 overflow-x-auto scrollbar-none -mx-3 px-3 md:mx-0 md:px-0">
           <button
             onClick={() => setSelectedMonthTab("Todos")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
+            className={`px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all border cursor-pointer shrink-0 ${
               selectedMonthTab === "Todos"
                 ? "bg-brand text-white border-brand/40"
                 : "bg-transparent text-slate-400 hover:text-white hover:bg-slate-900 border-transparent"
@@ -263,7 +255,7 @@ export default function EmployeeReportView({
             <button
               key={shortName}
               onClick={() => setSelectedMonthTab(shortName)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
+              className={`px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all border cursor-pointer shrink-0 ${
                 selectedMonthTab === shortName
                   ? "bg-transparent text-brand-light border-brand/40"
                   : "bg-transparent text-slate-400 hover:text-white hover:bg-slate-900 border-transparent"
@@ -275,16 +267,16 @@ export default function EmployeeReportView({
         </div>
 
         {/* Info Bar */}
-        <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-3 text-xs text-slate-400 flex items-center gap-3">
-          <Info size={15} className="text-brand-light shrink-0" />
+        <div className="bg-slate-900/30 border border-slate-800 rounded-xl md:rounded-2xl p-2.5 md:p-3 text-[10px] md:text-xs text-slate-400 flex items-center gap-2 md:gap-3">
+          <Info size={13} className="text-brand-light shrink-0" />
           <span>
-            <strong className="text-white uppercase text-[10px] tracking-wider mr-1">Atajo:</strong>
-            Hacé clic sobre cualquier día para registrar ausencias rápidas, ver observaciones o eliminar registros.
+            <strong className="text-white uppercase text-[9px] md:text-[10px] tracking-wider mr-1">Atajo:</strong>
+            Tocá un día para registrar ausencias rápidas o eliminar registros.
           </span>
         </div>
 
         {/* Calendar Matrix */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {MONTH_NAMES_SPANISH.map((monthName, monthIdx) => {
             const shortName = MONTH_SHORT_NAMES_SPANISH[monthIdx];
             if (selectedMonthTab !== "Todos" && selectedMonthTab !== shortName) return null;
@@ -292,18 +284,18 @@ export default function EmployeeReportView({
             const days = getCalendarDays(currentYear, monthIdx);
 
             return (
-              <div key={monthName} className="bg-slate-900/30 border border-slate-800 rounded-2xl p-3 flex flex-col hover:border-slate-700/60 transition-colors">
-                <h3 className="text-center text-sm font-bold text-white pb-2 border-b border-slate-800 mb-2">
+              <div key={monthName} className="bg-slate-900/30 border border-slate-800 rounded-xl md:rounded-2xl p-2 md:p-3 flex flex-col hover:border-slate-700/60 transition-colors">
+                <h3 className="text-center text-xs md:text-sm font-bold text-white pb-1.5 md:pb-2 border-b border-slate-800 mb-1.5 md:mb-2">
                   {monthName}
                 </h3>
 
-                <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">
+                <div className="grid grid-cols-7 gap-px md:gap-0.5 text-center text-[8px] md:text-[10px] font-bold text-slate-500 mb-0.5 md:mb-1 uppercase tracking-wider">
                   {WEEKDAYS_SPANISH.map((wd, wdIdx) => (
-                    <div key={wdIdx} className={wd === "D" || wd === "S" ? "text-red-400/60" : ""}>{wd}</div>
+                    <div key={wdIdx} className={`py-0.5 ${wd === "D" || wd === "S" ? "text-red-400/60" : ""}`}>{wd}</div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-0.5">
+                <div className="grid grid-cols-7 gap-px md:gap-0.5">
                   {days.map((dayNum, dayIdx) => {
                     if (dayNum === null) return <div key={`e-${dayIdx}`} className="aspect-square" />;
 
@@ -328,7 +320,7 @@ export default function EmployeeReportView({
                           setSelectedDayDetail({ dateStr, dayNum, monthIndex: monthIdx, absence, absenceType });
                           setShowDayModal(true);
                         }}
-                        className={`relative aspect-square rounded flex flex-col justify-between p-0.5 text-xs select-none hover:ring-1 hover:ring-brand-light/50 transition-all cursor-pointer ${
+                        className={`relative min-h-[28px] md:min-h-[36px] rounded flex flex-col items-center justify-center text-[9px] md:text-xs select-none hover:ring-1 hover:ring-brand-light/50 transition-all cursor-pointer ${
                           absence
                             ? `${colorConfig.calendarCell} ring-1 ring-current/30`
                             : isWeekend
@@ -336,9 +328,9 @@ export default function EmployeeReportView({
                               : "bg-slate-950/60 text-slate-400 border border-slate-800/50"
                         }`}
                       >
-                        <span className="font-semibold">{dayNum}</span>
+                        <span className="font-semibold leading-none">{dayNum}</span>
                         {absence && absenceType && (
-                          <span className={`text-[9px] font-bold self-end leading-none ${colorConfig.accentText}`}>
+                          <span className={`text-[7px] md:text-[9px] font-bold leading-none mt-px ${colorConfig.accentText}`}>
                             {absenceType.code}
                           </span>
                         )}
@@ -354,9 +346,9 @@ export default function EmployeeReportView({
 
       {/* Range Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/50">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-4 md:px-5 py-3 md:py-4 border-b border-slate-800 bg-slate-950/50">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Edit size={15} className="text-brand-light" />
                 Registrar Novedades
@@ -369,7 +361,7 @@ export default function EmployeeReportView({
               </button>
             </div>
 
-            <form onSubmit={handleSaveAbsenceRange} className="p-5 space-y-4">
+            <form onSubmit={handleSaveAbsenceRange} className="p-4 md:p-5 space-y-3 md:space-y-4">
               <div>
                 <label className="block text-[10px] uppercase tracking-widest text-brand-light mb-1 font-bold">
                   Tipo de Ausencia
@@ -386,7 +378,7 @@ export default function EmployeeReportView({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest text-brand-light mb-1 font-bold">
                     Fecha Desde
@@ -451,8 +443,8 @@ export default function EmployeeReportView({
 
       {/* Day Detail Modal */}
       {showDayModal && selectedDayDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 w-full sm:max-w-sm sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between px-4 py-3 bg-slate-950/50 border-b border-slate-800">
               <span className="text-[10px] uppercase tracking-widest text-brand-light font-bold">
                 {selectedDayDetail.dayNum} {MONTH_SHORT_NAMES_SPANISH[selectedDayDetail.monthIndex]} {currentYear}
@@ -465,7 +457,7 @@ export default function EmployeeReportView({
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 md:p-5 space-y-3 md:space-y-4">
               {selectedDayDetail.absence ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
