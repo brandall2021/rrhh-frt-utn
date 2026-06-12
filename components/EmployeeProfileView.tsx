@@ -11,20 +11,9 @@ import {
   UploadCloud,
   Download,
   CheckCircle,
-  AlertTriangle,
   XCircle,
   FileText,
-  User,
-  Briefcase,
-  Phone,
-  Calendar,
   Lock,
-  ChevronLeft,
-  ChevronRight,
-  ShieldAlert,
-  Clock,
-  History,
-  Info,
 } from "lucide-react";
 import {
   Employee,
@@ -33,27 +22,25 @@ import {
   VersionHistoryRecord,
   LeaveRequest,
   RequestState,
+  Department,
 } from "@/types";
 
 import { getNovedadBadgeStyles } from "./DashboardView";
-
-// NOTE: employeeDocuments, paySlipsData, versionHistoryData were previously imported
-// from src/data.ts (Vite). In Next.js these will come from API routes (Tasks 7-9).
-// Using empty defaults here as stubs until API layer is wired in.
-const employeeDocuments: Record<string, DocumentRecord[]> = {};
-const paySlipsData: Record<string, PaySlip[]> = {};
-const versionHistoryData: Record<string, VersionHistoryRecord[]> = {};
 
 interface EmployeeProfileViewProps {
   employee: Employee;
   onBackClick: () => void;
   allLeaveRequests: LeaveRequest[];
+  departments: Department[];
+  onEmployeeUpdate?: (data: Partial<Employee>) => Promise<void>;
 }
 
 export default function EmployeeProfileView({
   employee,
   onBackClick,
   allLeaveRequests,
+  departments,
+  onEmployeeUpdate,
 }: EmployeeProfileViewProps) {
   // Tabs: "personal" | "contacto" | "laboral" | "documentos"
   const [activeTab, setActiveTab] = useState<"personal" | "contacto" | "laboral" | "documentos">(
@@ -62,12 +49,10 @@ export default function EmployeeProfileView({
 
   // States
   const [documents, setDocuments] = useState<DocumentRecord[]>(
-    employeeDocuments[employee.id] || []
+    employee.documents ?? []
   );
-  const [paySlips, setPaySlips] = useState<PaySlip[]>(paySlipsData[employee.id] || []);
-  const [versionHistory, setVersionHistory] = useState<VersionHistoryRecord[]>(
-    versionHistoryData[employee.id] || []
-  );
+  const [paySlips, setPaySlips] = useState<PaySlip[]>([]);
+  const [versionHistory, setVersionHistory] = useState<VersionHistoryRecord[]>([]);
 
   // Document action uploading
   const [isUploading, setIsUploading] = useState(false);
@@ -77,6 +62,64 @@ export default function EmployeeProfileView({
   const [selectedPaySlipToSign, setSelectedPaySlipToSign] = useState<PaySlip | null>(null);
   const [signingPin, setSigningPin] = useState("");
   const [isSigningInProcess, setIsSigningInProcess] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadDocName, setUploadDocName] = useState("");
+  const [uploadCategory, setUploadCategory] = useState("Contractual");
+  const [uploadExpiryDate, setUploadExpiryDate] = useState("");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadingReal, setUploadingReal] = useState(false);
+
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    cuil: employee.cuil,
+    email: employee.email,
+    phone: employee.phone,
+    birthDate: employee.birthDate,
+    maritalStatus: employee.maritalStatus,
+    address: employee.address,
+    emergencyContact: { ...employee.emergencyContact },
+    role: employee.role,
+    departmentId: employee.departmentId,
+    hireDate: employee.hireDate,
+    exitDate: employee.exitDate ?? "",
+    status: employee.status,
+  });
+
+  const handleSave = async () => {
+    if (!onEmployeeUpdate) return;
+    setSaving(true);
+    try {
+      await onEmployeeUpdate(formData);
+      setEditing(false);
+    } catch (err: any) {
+      alert(err.message ?? "Error al guardar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      cuil: employee.cuil,
+      email: employee.email,
+      phone: employee.phone,
+      birthDate: employee.birthDate,
+      maritalStatus: employee.maritalStatus,
+      address: employee.address,
+      emergencyContact: { ...employee.emergencyContact },
+      role: employee.role,
+      departmentId: employee.departmentId,
+      hireDate: employee.hireDate,
+      exitDate: employee.exitDate ?? "",
+      status: employee.status,
+    });
+    setEditing(false);
+  };
 
   // Filter employee leaves from global state
   const employeeLeaves = allLeaveRequests.filter((r) => r.employeeId === employee.id);
@@ -91,6 +134,53 @@ export default function EmployeeProfileView({
 
   const handleDownloadFullZip = () => {
     alert("Compilando legajo digital en un archivo comprimido .ZIP...\n\nContiene:\n- Información laboral de " + employee.firstName + " " + employee.lastName + "\n- 14 archivos firmados adjuntos\n- Últimos 3 recibos de sueldo verificados.");
+  };
+
+  const handleRealUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadFile || !uploadDocName.trim()) {
+      alert("Completá el nombre y seleccioná un archivo.");
+      return;
+    }
+    setUploadingReal(true);
+    const form = new FormData();
+    form.append("file", uploadFile);
+    form.append("name", uploadDocName.trim());
+    form.append("category", uploadCategory);
+    if (uploadExpiryDate) form.append("expiryDate", uploadExpiryDate);
+
+    try {
+      const res = await fetch(`/api/employees/${employee.id}/documents`, {
+        method: "POST",
+        body: form,
+      });
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error);
+      }
+      const { data } = await res.json();
+      setDocuments((prev) => [data, ...prev]);
+      setIsUploadModalOpen(false);
+      setUploadDocName("");
+      setUploadFile(null);
+      setUploadExpiryDate("");
+    } catch (err: any) {
+      alert(err.message ?? "Error al subir el documento");
+    } finally {
+      setUploadingReal(false);
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string) => {
+    if (!confirm("¿Eliminar este documento?")) return;
+    const res = await fetch(`/api/employees/${employee.id}/documents/${docId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setDocuments((prev) => prev.filter((d) => d.id !== docId));
+    } else {
+      alert("Error al eliminar el documento");
+    }
   };
 
   const handleSimulatedFileUpload = (category: DocumentRecord["category"]) => {
@@ -219,20 +309,46 @@ export default function EmployeeProfileView({
           </div>
 
           <div className="flex flex-row gap-2 w-full md:w-auto self-stretch md:self-center">
-            <button
-              onClick={() => handleSimulatedFileUpload("Contractual")}
-              className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-indigo-400 hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <UploadCloud className="w-3.5 h-3.5" />
-              Subir Documento
-            </button>
-            <button
-              onClick={handleDownloadFullZip}
-              className="flex-1 md:flex-initial bg-indigo-600 hover:bg-indigo-505 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.2)] border border-indigo-500/20"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Descargar Legajo completo
-            </button>
+            {editing ? (
+              <>
+                <button
+                  onClick={handleCancel}
+                  className="flex-1 md:flex-initial bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-indigo-400 hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  Subir Documento
+                </button>
+                <button
+                  onClick={handleDownloadFullZip}
+                  className="flex-1 md:flex-initial bg-indigo-600 hover:bg-indigo-505 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.2)] border border-indigo-500/20"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Descargar Legajo completo
+                </button>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="flex-1 md:flex-initial bg-slate-950 border border-slate-800 text-indigo-400 hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Editar perfil
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -383,26 +499,27 @@ export default function EmployeeProfileView({
                             </td>
                             <td className="px-4 py-2.5 text-right whitespace-nowrap">
                               <div className="flex justify-end gap-1">
-                                <button
-                                  onClick={() => alert(`Previsualizando archivo: ${doc.fileName}`)}
+                                <a
+                                  href={`/api/uploads/${doc.fileName}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   className="text-[10px] font-bold text-indigo-400 hover:underline px-2 py-1 hover:bg-slate-800 rounded cursor-pointer"
                                 >
                                   Ver
-                                </button>
-                                <button
-                                  onClick={() => alert(`Descargando copia local de ${doc.fileName}...`)}
+                                </a>
+                                <a
+                                  href={`/api/uploads/${doc.fileName}`}
+                                  download
                                   className="text-[10px] font-bold text-slate-300 hover:underline px-2 py-1 hover:bg-slate-800 rounded cursor-pointer"
                                 >
                                   Descargar
+                                </a>
+                                <button
+                                  onClick={() => handleDeleteDocument(doc.id)}
+                                  className="text-[10px] font-bold text-rose-400 hover:underline px-2 py-1 hover:bg-rose-950/20 rounded cursor-pointer"
+                                >
+                                  Eliminar
                                 </button>
-                                {doc.status === "RECHAZADO" && (
-                                  <button
-                                    onClick={() => handleSimulatedFileUpload(doc.category)}
-                                    className="text-[10px] font-bold text-rose-400 hover:underline px-2 py-1 hover:bg-rose-950/20 rounded cursor-pointer animate-pulse"
-                                  >
-                                    Re-subir
-                                  </button>
-                                )}
                               </div>
                             </td>
                           </tr>
@@ -488,54 +605,77 @@ export default function EmployeeProfileView({
                 exit={{ opacity: 0 }}
                 className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-all shadow-sm text-left grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 font-sans text-xs"
               >
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Nombre Completo
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.firstName} {employee.lastName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    CUIL / CUIT
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5 font-mono">
-                    {employee.cuil}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Fecha de Nacimiento
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.birthDate}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Estado Civil
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.maritalStatus}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Domicilio Fiscal / Real
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.address}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Email Personal
-                  </p>
-                  <p className="text-sm font-semibold text-indigo-400 mt-0.5 hover:underline cursor-pointer">
-                    {employee.email}
-                  </p>
-                </div>
+                {editing ? (
+                  <>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Nombre</label>
+                      <input value={formData.firstName} onChange={e => setFormData(p => ({ ...p, firstName: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Apellido</label>
+                      <input value={formData.lastName} onChange={e => setFormData(p => ({ ...p, lastName: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">CUIL / CUIT</label>
+                      <input value={formData.cuil} onChange={e => setFormData(p => ({ ...p, cuil: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Fecha de Nacimiento</label>
+                      <input type="date" value={formData.birthDate} onChange={e => setFormData(p => ({ ...p, birthDate: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estado Civil</label>
+                      <input value={formData.maritalStatus} onChange={e => setFormData(p => ({ ...p, maritalStatus: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Domicilio</label>
+                      <input value={formData.address} onChange={e => setFormData(p => ({ ...p, address: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Email</label>
+                      <input type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Teléfono</label>
+                      <input value={formData.phone} onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nombre Completo</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.firstName} {employee.lastName}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CUIL / CUIT</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5 font-mono">{employee.cuil}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha de Nacimiento</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.birthDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estado Civil</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.maritalStatus}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Domicilio Fiscal / Real</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Personal</p>
+                      <p className="text-sm font-semibold text-indigo-400 mt-0.5 hover:underline cursor-pointer">{employee.email}</p>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -548,30 +688,43 @@ export default function EmployeeProfileView({
                 exit={{ opacity: 0 }}
                 className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-all shadow-sm text-left grid grid-cols-1 md:grid-cols-2 gap-5 text-xs"
               >
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Nombre del Contacto
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.emergencyContact.name}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Parentesco / Relación
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.emergencyContact.relationship}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Teléfono de Urgencia
-                  </p>
-                  <p className="text-sm font-semibold text-indigo-400 font-mono mt-0.5">
-                    {employee.emergencyContact.phone}
-                  </p>
-                </div>
+                {editing ? (
+                  <>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Nombre del Contacto</label>
+                      <input value={formData.emergencyContact.name}
+                        onChange={e => setFormData(p => ({ ...p, emergencyContact: { ...p.emergencyContact, name: e.target.value } }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Parentesco / Relación</label>
+                      <input value={formData.emergencyContact.relationship}
+                        onChange={e => setFormData(p => ({ ...p, emergencyContact: { ...p.emergencyContact, relationship: e.target.value } }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Teléfono de Urgencia</label>
+                      <input value={formData.emergencyContact.phone}
+                        onChange={e => setFormData(p => ({ ...p, emergencyContact: { ...p.emergencyContact, phone: e.target.value } }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nombre del Contacto</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.emergencyContact.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Parentesco / Relación</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.emergencyContact.relationship}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Teléfono de Urgencia</p>
+                      <p className="text-sm font-semibold text-indigo-400 font-mono mt-0.5">{employee.emergencyContact.phone}</p>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -584,54 +737,67 @@ export default function EmployeeProfileView({
                 exit={{ opacity: 0 }}
                 className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-all shadow-sm text-left grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-xs"
               >
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Puesto Actual
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.role}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Área Operativa
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.department}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Fecha de Contratación
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    {employee.hireDate}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Supervisor Directo
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    Andrés Martínez (IT Director)
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Convenio Aplicable
-                  </p>
-                  <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                    CCT Empleados de Comercio / Fuera de Convenio
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Evaluación de Desempeño
-                  </p>
-                  <p className="text-sm font-semibold text-emerald-400 mt-0.5">
-                    9.2 / 10 (Excelente)
-                  </p>
-                </div>
+                {editing ? (
+                  <>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Puesto Actual</label>
+                      <input value={formData.role} onChange={e => setFormData(p => ({ ...p, role: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Departamento</label>
+                      <select value={formData.departmentId} onChange={e => setFormData(p => ({ ...p, departmentId: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                        {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Fecha de Contratación</label>
+                      <input type="date" value={formData.hireDate} onChange={e => setFormData(p => ({ ...p, hireDate: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Fecha de Egreso</label>
+                      <input type="date" value={formData.exitDate} onChange={e => setFormData(p => ({ ...p, exitDate: e.target.value }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estado</label>
+                      <select value={formData.status} onChange={e => setFormData(p => ({ ...p, status: e.target.value as "ACTIVO" | "INACTIVO" }))}
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
+                      </select>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Puesto Actual</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.role}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Área Operativa</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.department}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha de Contratación</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">{employee.hireDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Supervisor Directo</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">Andrés Martínez (IT Director)</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Convenio Aplicable</p>
+                      <p className="text-sm font-semibold text-slate-200 mt-0.5">CCT Empleados de Comercio / Fuera de Convenio</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Evaluación de Desempeño</p>
+                      <p className="text-sm font-semibold text-emerald-400 mt-0.5">9.2 / 10 (Excelente)</p>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -737,6 +903,88 @@ export default function EmployeeProfileView({
           </div>
         </aside>
       </div>
+
+      {/* Modal de subida de documento */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-slate-900 rounded-3xl border border-slate-800 max-w-md w-full p-6"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <UploadCloud className="w-4 h-4 text-indigo-400" />
+                Subir Documento
+              </h3>
+              <button onClick={() => setIsUploadModalOpen(false)} className="p-1 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <XCircle className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+            <form onSubmit={handleRealUpload} className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre del documento *</label>
+                <input
+                  value={uploadDocName}
+                  onChange={e => setUploadDocName(e.target.value)}
+                  placeholder="Ej: DNI Frente"
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 placeholder-slate-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Categoría *</label>
+                <select
+                  value={uploadCategory}
+                  onChange={e => setUploadCategory(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                >
+                  <option>Identidad</option>
+                  <option>Académico</option>
+                  <option>Contractual</option>
+                  <option>Médico</option>
+                  <option>Legales</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fecha de vencimiento</label>
+                <input
+                  type="date"
+                  value={uploadExpiryDate}
+                  onChange={e => setUploadExpiryDate(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Archivo *</label>
+                <input
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={e => setUploadFile(e.target.files?.[0] ?? null)}
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:bg-indigo-600 file:text-white file:text-xs file:cursor-pointer"
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsUploadModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white bg-slate-800 rounded-xl cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingReal}
+                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl cursor-pointer disabled:opacity-50"
+                >
+                  {uploadingReal ? "Subiendo..." : "Subir"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* Recibo Signing Modal Simulation screen */}
       {selectedPaySlipToSign && (

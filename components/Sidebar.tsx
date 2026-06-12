@@ -8,7 +8,6 @@ import React from "react";
 import {
   ClipboardCheck,
   Users,
-  CalendarDays,
   FileBarChart2,
   Settings,
   HelpCircle,
@@ -91,6 +90,18 @@ export default function Sidebar({
         >
           <FileBarChart2 className="w-4 h-4" />
           <span>Reportes & Estadísticas</span>
+        </button>
+
+        <button
+          onClick={() => onViewChange("settings")}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
+            currentView === "settings"
+              ? "bg-indigo-600 text-white border-indigo-500/30 font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+              : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
+          }`}
+        >
+          <Settings className="w-4 h-4" />
+          <span>Configuración</span>
         </button>
       </nav>
 
