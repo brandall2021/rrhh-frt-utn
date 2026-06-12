@@ -17,6 +17,6 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
-RUN npm install -g prisma
+RUN npm install -g prisma@5.22.0
 EXPOSE 3000
 CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
