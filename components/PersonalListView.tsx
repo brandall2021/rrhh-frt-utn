@@ -85,18 +85,18 @@ export default function PersonalListView({
     }
 
     const customId = `EMP-${Math.floor(10000 + Math.random() * 90000)}`;
-    const newRecord: Partial<Employee> = {
+    const newRecord = {
       id: customId,
-      firstName: newFirstName,
-      lastName: newLastName,
+      firstName: newFirstName.trim(),
+      lastName: newLastName.trim(),
       department: newDept,
-      role: newRole,
-      status: "ACTIVO",
-      hireDate: "10 de Junio, 2026", // Today's date from local context
+      role: newRole.trim(),
+      status: "ACTIVO" as const,
+      hireDate: new Date().toISOString().split("T")[0],
       cuil: newCuil || "20-00000000-0",
-      email: newEmail || `${newFirstName.toLowerCase()}.${newLastName.toLowerCase()}@precisionhr.com`,
+      email: newEmail || `${newFirstName.toLowerCase().trim()}.${newLastName.toLowerCase().trim()}@precisionhr.com`,
       phone: newPhone || "+54 11 0000-0000",
-      birthDate: "01 de Enero, 1990",
+      birthDate: "1990-01-01",
       maritalStatus: "Soltero",
       address: "Av. Corrientes 1000, CABA",
       emergencyContact: {
@@ -104,12 +104,6 @@ export default function PersonalListView({
         relationship: "Familiar",
         phone: "+54 11 0000-0000",
       },
-      workedDaysThisMonth: 22,
-      totalDaysThisMonth: 22,
-      totalFiles: 0,
-      vigenteFiles: 0,
-      vencidosFiles: 0,
-      rechazadosFiles: 0,
     };
 
     onAddEmployee(newRecord);
