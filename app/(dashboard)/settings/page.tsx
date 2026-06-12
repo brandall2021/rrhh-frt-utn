@@ -2,25 +2,33 @@
 
 import { useState, useEffect, useCallback } from "react";
 import SettingsView from "@/components/SettingsView";
-import type { Department } from "@/types";
+import type { Department, AbsenceType } from "@/types";
 
 export default function SettingsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [absenceTypes, setAbsenceTypes] = useState<AbsenceType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDepartments = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const res = await fetch("/api/departments");
-      const { data } = await res.json();
-      setDepartments(data ?? []);
+      const [deptRes, typesRes] = await Promise.all([
+        fetch("/api/departments"),
+        fetch("/api/absence-types"),
+      ]);
+      const { data: deptData } = await deptRes.json();
+      setDepartments(deptData ?? []);
+      if (typesRes.ok) {
+        const { data: typesData } = await typesRes.json();
+        setAbsenceTypes(typesData ?? []);
+      }
     } catch (err) {
-      console.error("Error fetching departments:", err);
+      console.error("Error fetching settings data:", err);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchDepartments(); }, [fetchDepartments]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleCreate = async (name: string) => {
     const res = await fetch("/api/departments", {
@@ -32,7 +40,7 @@ export default function SettingsPage() {
       const { error } = await res.json();
       throw new Error(error);
     }
-    await fetchDepartments();
+    await fetchData();
   };
 
   const handleUpdate = async (id: string, name: string) => {
@@ -45,7 +53,7 @@ export default function SettingsPage() {
       const { error } = await res.json();
       throw new Error(error);
     }
-    await fetchDepartments();
+    await fetchData();
   };
 
   const handleToggleActive = async (id: string, active: boolean) => {
@@ -59,7 +67,17 @@ export default function SettingsPage() {
       alert(error);
       return;
     }
-    await fetchDepartments();
+    await fetchData();
+  };
+
+  const handleSaveAbsenceTypes = async (types: AbsenceType[]) => {
+    const res = await fetch("/api/absence-types", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ types }),
+    });
+    if (!res.ok) throw new Error("Error al guardar tipos de ausencia");
+    setAbsenceTypes(types);
   };
 
   if (loading) {
@@ -76,6 +94,8 @@ export default function SettingsPage() {
       onCreate={handleCreate}
       onUpdate={handleUpdate}
       onToggleActive={handleToggleActive}
+      absenceTypes={absenceTypes}
+      onSaveAbsenceTypes={handleSaveAbsenceTypes}
     />
   );
 }

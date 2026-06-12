@@ -37,6 +37,7 @@ export interface Employee {
   birthDate: string;
   maritalStatus: string;
   address: string;
+  photoUrl?: string;
   emergencyContact: {
     name: string;
     relationship: string;

@@ -48,6 +48,7 @@ export default function EmployeeProfileView({
   const [activeTab, setActiveTab] = useState<"personal" | "contacto" | "laboral" | "documentos">(
     "documentos"
   );
+  const [photoUrl, setPhotoUrl] = useState<string | null>(employee.photoUrl ?? null);
 
   // States
   const [documents, setDocuments] = useState<DocumentRecord[]>(
@@ -282,9 +283,38 @@ export default function EmployeeProfileView({
       <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-all shadow-sm">
         <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
           <div className="flex gap-4 items-center">
-            <div className="w-16 h-16 bg-slate-800 text-slate-200 border border-slate-705 rounded-2xl flex items-center justify-center font-bold text-lg select-none">
-              {employee.firstName[0]}
-              {employee.lastName[0]}
+            <div className="relative group">
+              <div className="w-16 h-16 bg-slate-800 text-slate-200 border border-slate-705 rounded-2xl flex items-center justify-center font-bold text-lg select-none overflow-hidden">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{employee.firstName[0]}{employee.lastName[0]}</span>
+                )}
+              </div>
+              <label className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 rounded-2xl cursor-pointer transition-opacity">
+                <UploadCloud className="w-5 h-5 text-white" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append("photo", file);
+                    try {
+                      const res = await fetch(`/api/employees/${employee.id}/photo`, {
+                        method: "POST",
+                        body: fd,
+                      });
+                      if (res.ok) {
+                        const { data } = await res.json();
+                        setPhotoUrl(data.photoUrl);
+                      }
+                    } catch {}
+                  }}
+                />
+              </label>
             </div>
             <div className="text-left">
               <div className="flex flex-wrap items-center gap-2">

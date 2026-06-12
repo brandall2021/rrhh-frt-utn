@@ -238,9 +238,12 @@ export default function PersonalListView({
                   {/* Card Title & Initials */}
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex gap-3">
-                      <div className="w-12 h-12 bg-slate-800 text-slate-200 border border-slate-700 rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
-                        {emp.firstName[0]}
-                        {emp.lastName[0]}
+                      <div className="w-12 h-12 bg-slate-800 text-slate-200 border border-slate-700 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+                        {(emp as any).photoUrl ? (
+                          <img src={(emp as any).photoUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{emp.firstName[0]}{emp.lastName[0]}</span>
+                        )}
                       </div>
                       <div className="text-left">
                         <h3 className="font-bold text-xs text-white line-clamp-1">

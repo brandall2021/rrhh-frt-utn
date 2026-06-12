@@ -5,16 +5,6 @@ import { useRouter } from "next/navigation";
 import EmployeeReportView from "@/components/EmployeeReportView";
 import type { Employee, AbsenceType, Absence } from "@/types";
 
-const DEFAULT_ABSENCE_TYPES: AbsenceType[] = [
-  { id: "enfermedad", name: "Enfermedad", code: "ENF", color: "red" },
-  { id: "particular", name: "Particular", code: "PAR", color: "amber" },
-  { id: "estudio", name: "Estudio", code: "EST", color: "blue" },
-  { id: "compensatorio", name: "Compensatorio", code: "COM", color: "emerald" },
-  { id: "medica", name: "Licencia Médica", code: "MED", color: "orange" },
-  { id: "maternidad", name: "Maternidad", code: "MAT", color: "purple" },
-  { id: "ausencia", name: "Ausencia", code: "AUS", color: "slate" },
-];
-
 export default function EmployeeReportPage({
   params,
 }: {
@@ -22,6 +12,7 @@ export default function EmployeeReportPage({
 }) {
   const router = useRouter();
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [absenceTypes, setAbsenceTypes] = useState<AbsenceType[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
   const absencesRef = useRef(absences);
   absencesRef.current = absences;
@@ -29,9 +20,10 @@ export default function EmployeeReportPage({
 
   const fetchData = useCallback(async () => {
     try {
-      const [empRes, absencesRes] = await Promise.all([
+      const [empRes, absencesRes, typesRes] = await Promise.all([
         fetch(`/api/employees/${params.id}`),
         fetch(`/api/employees/${params.id}/absences`),
+        fetch("/api/absence-types"),
       ]);
 
       if (!empRes.ok) {
@@ -46,6 +38,11 @@ export default function EmployeeReportPage({
       if (absencesRes.ok) {
         const { data: absencesData } = await absencesRes.json();
         setAbsences(absencesData ?? []);
+      }
+
+      if (typesRes.ok) {
+        const { data: typesData } = await typesRes.json();
+        setAbsenceTypes(typesData ?? []);
       }
     } catch (error) {
       console.error("Error fetching employee report data:", error);
@@ -87,7 +84,7 @@ export default function EmployeeReportPage({
     <EmployeeReportView
       onBack={() => router.push(`/personal/${params.id}`)}
       selectedEmployee={employee}
-      absenceTypes={DEFAULT_ABSENCE_TYPES}
+      absenceTypes={absenceTypes}
       absences={absences}
       setAbsences={syncAbsences}
     />

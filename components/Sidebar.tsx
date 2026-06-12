@@ -31,11 +31,9 @@ export default function Sidebar({
       {/* Admin Panel Profile */}
       <div className="px-5 mb-6">
         <div className="flex items-center gap-3">
-          <img
-            src="/images/logo-face-white.png"
-            alt="FACE - UNT"
-            className="h-7 w-auto object-contain"
-          />
+          <div className="w-8 h-8 rounded-lg bg-brand/20 border border-brand/30 flex items-center justify-center text-brand-light font-bold text-xs">
+            F
+          </div>
           <div>
             <p className="font-semibold text-sm text-slate-100 leading-tight">
               Gestión Operativa
