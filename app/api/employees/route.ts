@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  let body: any;
+  let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
@@ -22,23 +22,32 @@ export async function POST(request: Request) {
   }
 
   const {
-    workedDaysThisMonth,
-    totalDaysThisMonth,
-    totalFiles,
-    vigenteFiles,
-    vencidosFiles,
-    rechazadosFiles,
+    workedDaysThisMonth: _1,
+    totalDaysThisMonth: _2,
+    totalFiles: _3,
+    vigenteFiles: _4,
+    vencidosFiles: _5,
+    rechazadosFiles: _6,
     ...cleanBody
-  } = body;
+  } = body as Record<string, unknown> & {
+    workedDaysThisMonth?: unknown;
+    totalDaysThisMonth?: unknown;
+    totalFiles?: unknown;
+    vigenteFiles?: unknown;
+    vencidosFiles?: unknown;
+    rechazadosFiles?: unknown;
+  };
+  void _1; void _2; void _3; void _4; void _5; void _6;
 
   try {
     const employee = await createEmployee({
-      ...cleanBody,
-      hireDate: new Date(cleanBody.hireDate),
-      birthDate: new Date(cleanBody.birthDate),
+      ...(cleanBody as Parameters<typeof createEmployee>[0]),
+      hireDate: new Date(cleanBody.hireDate as string),
+      birthDate: new Date(cleanBody.birthDate as string),
     });
     return Response.json({ data: employee }, { status: 201 });
-  } catch (err: any) {
-    return Response.json({ error: err.message ?? "Error creating employee" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Error creating employee";
+    return Response.json({ error: message }, { status: 500 });
   }
 }
