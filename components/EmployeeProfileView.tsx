@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
@@ -42,6 +43,7 @@ export default function EmployeeProfileView({
   departments,
   onEmployeeUpdate,
 }: EmployeeProfileViewProps) {
+  const router = useRouter();
   // Tabs: "personal" | "contacto" | "laboral" | "documentos"
   const [activeTab, setActiveTab] = useState<"personal" | "contacto" | "laboral" | "documentos">(
     "documentos"
@@ -417,6 +419,13 @@ export default function EmployeeProfileView({
           }`}
         >
           Datos Laborales
+        </button>
+
+        <button
+          onClick={() => router.push(`/personal/${employee.id}/report`)}
+          className="px-4 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap px-4 py-2 border-transparent text-slate-400 hover:text-white hover:border-brand/30"
+        >
+          Asistencias
         </button>
       </div>
 

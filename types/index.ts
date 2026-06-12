@@ -119,3 +119,18 @@ export interface VersionHistoryRecord {
   date: string;
   archived?: boolean;
 }
+
+export interface AbsenceType {
+  id: string;
+  name: string;
+  code: string;
+  color: string;
+}
+
+export interface Absence {
+  id: string;
+  employeeId: string;
+  absenceTypeId: string;
+  date: string;
+  notes?: string;
+}
