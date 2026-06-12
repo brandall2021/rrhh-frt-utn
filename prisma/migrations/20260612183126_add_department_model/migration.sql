@@ -30,10 +30,13 @@ SET "departmentId" = d.id
 FROM "Department" d
 WHERE e.department = d.name;
 
--- Si algún empleado no tiene departamento, asignar el primero disponible
-UPDATE "Employee"
-SET "departmentId" = (SELECT id FROM "Department" ORDER BY name LIMIT 1)
-WHERE "departmentId" IS NULL;
+-- Fallar si hay empleados sin departamento asignable
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM "Employee" WHERE "departmentId" IS NULL) THEN
+    RAISE EXCEPTION 'Hay empleados sin departamento — revisar antes de continuar';
+  END IF;
+END $$;
 
 -- Hacer NOT NULL
 ALTER TABLE "Employee" ALTER COLUMN "departmentId" SET NOT NULL;
