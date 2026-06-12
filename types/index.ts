@@ -26,6 +26,7 @@ export interface Employee {
   firstName: string;
   lastName: string;
   department: string;
+  departmentId: string;
   role: string;
   status: "ACTIVO" | "INACTIVO";
   hireDate: string;
@@ -47,6 +48,13 @@ export interface Employee {
   vigenteFiles: number;
   vencidosFiles: number;
   rechazadosFiles: number;
+  documents?: DocumentRecord[];
+}
+
+export interface Department {
+  id: string;
+  name: string;
+  active: boolean;
 }
 
 export interface LeaveRequest {

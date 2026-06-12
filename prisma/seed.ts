@@ -26,12 +26,24 @@ async function main() {
     create: { email: "admin@precisionhr.com", name: "Admin" },
   });
 
+  // Upsert departments
+  const departmentNames = ["IT & Desarrollo", "Operaciones", "Marketing", "IT Ops", "Ventas"];
+  const departmentMap: Record<string, string> = {};
+  for (const name of departmentNames) {
+    const dept = await prisma.department.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+    departmentMap[name] = dept.id;
+  }
+
   const employees = [
     {
       id: "EMP-2941",
       firstName: "Rodrigo Hernán",
       lastName: "Silva",
-      department: "IT & Desarrollo",
+      departmentId: departmentMap["IT & Desarrollo"],
       role: "Senior Fullstack Developer",
       status: "ACTIVO" as const,
       hireDate: parseSpanishDate("02 de Enero, 2019"),
@@ -47,7 +59,7 @@ async function main() {
       id: "EMP-24592",
       firstName: "Luis Angel",
       lastName: "Batallan",
-      department: "Operaciones",
+      departmentId: departmentMap["Operaciones"],
       role: "Administrador de Infraestructura",
       status: "ACTIVO" as const,
       hireDate: parseSpanishDate("15 de Marzo, 2015"),
@@ -63,7 +75,7 @@ async function main() {
       id: "EMP-2948",
       firstName: "Martina",
       lastName: "Rodriguez",
-      department: "Marketing",
+      departmentId: departmentMap["Marketing"],
       role: "Social Media Strategist",
       status: "ACTIVO" as const,
       hireDate: parseSpanishDate("15 de Julio, 2021"),
@@ -79,7 +91,7 @@ async function main() {
       id: "EMP-4410",
       firstName: "Javier",
       lastName: "Casal",
-      department: "IT Ops",
+      departmentId: departmentMap["IT Ops"],
       role: "Database Administrator",
       status: "ACTIVO" as const,
       hireDate: parseSpanishDate("10 de Abril, 2020"),
@@ -95,7 +107,7 @@ async function main() {
       id: "EMP-1122",
       firstName: "Sofia",
       lastName: "Mendez",
-      department: "Ventas",
+      departmentId: departmentMap["Ventas"],
       role: "Ejecutivo de Cuentas Senior",
       status: "ACTIVO" as const,
       hireDate: parseSpanishDate("11 de Septiembre, 2018"),

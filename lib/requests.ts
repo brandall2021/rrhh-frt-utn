@@ -8,7 +8,13 @@ export async function getRequests(filters?: { state?: RequestState; employeeId?:
       ...(filters?.employeeId && { employeeId: filters.employeeId }),
     },
     include: {
-      employee: { select: { firstName: true, lastName: true, department: true } },
+      employee: {
+        select: {
+          firstName: true,
+          lastName: true,
+          department: { select: { name: true } },
+        },
+      },
     },
     orderBy: { submissionDate: "desc" },
   });
@@ -17,7 +23,7 @@ export async function getRequests(filters?: { state?: RequestState; employeeId?:
     id: r.id,
     employeeId: r.employeeId,
     employeeName: `${r.employee.firstName} ${r.employee.lastName}`,
-    department: r.employee.department,
+    department: r.employee.department.name,
     type: r.type,
     startDate: r.startDate.toISOString().slice(0, 10),
     endDate: r.endDate.toISOString().slice(0, 10),

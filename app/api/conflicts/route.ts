@@ -10,14 +10,20 @@ export async function GET() {
   const requests = await prisma.leaveRequest.findMany({
     where: { state: { in: ["PENDIENTE", "APROBADO"] } },
     include: {
-      employee: { select: { firstName: true, lastName: true, department: true } },
+      employee: {
+        select: {
+          firstName: true,
+          lastName: true,
+          department: { select: { name: true } },
+        },
+      },
     },
   });
 
   const formatted = requests.map((r) => ({
     employeeId: r.employeeId,
     employeeName: `${r.employee.firstName} ${r.employee.lastName}`,
-    department: r.employee.department,
+    department: r.employee.department.name,
     type: r.type,
     startDate: r.startDate,
     endDate: r.endDate,

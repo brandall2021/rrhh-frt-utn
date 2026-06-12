@@ -20,7 +20,7 @@ export default function EmployeeProfilePage({
       try {
         const [empRes, leavesRes] = await Promise.all([
           fetch(`/api/employees/${params.id}`),
-          fetch("/api/leave-requests"),
+          fetch("/api/requests"),
         ]);
 
         const { data: empData } = await empRes.json();
