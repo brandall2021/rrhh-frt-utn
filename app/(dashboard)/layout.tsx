@@ -9,6 +9,7 @@ const PATH_TO_VIEW: Record<string, string> = {
   "/personal": "personal",
   "/requests": "requests",
   "/reports": "reports",
+  "/birthdays": "birthdays",
   "/settings": "settings",
 };
 
@@ -17,6 +18,7 @@ const VIEW_TO_PATH: Record<string, string> = {
   personal: "/personal",
   requests: "/requests",
   reports: "/reports",
+  birthdays: "/birthdays",
   settings: "/settings",
 };
 

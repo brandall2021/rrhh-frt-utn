@@ -10,6 +10,7 @@ import {
   Users,
   FileBarChart2,
   Settings,
+  Gift,
   HelpCircle,
   LogOut,
   Plus,
@@ -90,6 +91,18 @@ export default function Sidebar({
         >
           <FileBarChart2 className="w-4 h-4" />
           <span>Reportes & Estadísticas</span>
+        </button>
+
+        <button
+          onClick={() => onViewChange("birthdays")}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
+            currentView === "birthdays"
+              ? "bg-brand text-white border-brand/30 font-bold shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
+              : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
+          }`}
+        >
+          <Gift className="w-4 h-4" />
+          <span>Cumpleaños</span>
         </button>
 
         <button
