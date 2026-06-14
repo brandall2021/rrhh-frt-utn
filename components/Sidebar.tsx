@@ -28,7 +28,7 @@ export default function Sidebar({
   onNewRequestClick,
 }: SidebarProps) {
   return (
-    <aside className="w-64 h-[calc(100vh-3.5rem)] bg-[#020617]/50 border-r border-slate-900 flex flex-col py-5 shrink-0 select-none text-slate-200">
+    <aside className="w-64 h-[calc(100vh-3.5rem)] bg-[var(--bg-primary)]/50 border-r border-[var(--border)] flex flex-col py-5 shrink-0 select-none text-[var(--text-secondary)]">
       {/* Admin Panel Profile */}
       <div className="px-5 mb-6">
         <div className="flex items-center gap-3">

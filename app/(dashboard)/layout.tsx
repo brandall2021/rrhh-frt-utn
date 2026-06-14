@@ -37,7 +37,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col font-sans select-none antialiased text-[#f1f5f9]">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col font-sans select-none antialiased text-[var(--text-primary)]">
       <Header
         currentView={currentView}
         onViewChange={handleViewChange}

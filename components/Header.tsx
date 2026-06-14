@@ -5,7 +5,8 @@
  */
 
 import React from "react";
-import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2 } from "lucide-react";
+import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2, Sun, Moon } from "lucide-react";
+import { useTheme } from "./ThemeProvider";
 
 interface HeaderProps {
   currentView: string;
@@ -21,7 +22,7 @@ export default function Header({
   onSearchChange,
 }: HeaderProps) {
   return (
-    <header className="h-14 w-full bg-[#020617]/80 backdrop-blur-md border-b border-slate-900 flex justify-between items-center px-5 sticky top-0 z-50 select-none">
+    <header className="h-14 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border)] flex justify-between items-center px-5 sticky top-0 z-50 select-none">
       {/* Brand Logo and Title */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange("dashboard")}>
@@ -89,6 +90,9 @@ export default function Header({
           />
         </div>
 
+        {/* Theme Toggle */}
+        <ThemeToggleButton />
+
         {/* Action Widgets */}
         <button
           onClick={() => alert("Central de novedades: No hay alertas pendientes.")}
@@ -126,5 +130,18 @@ export default function Header({
         </div>
       </div>
     </header>
+  );
+}
+
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
+      title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
+    >
+      {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+    </button>
   );
 }
