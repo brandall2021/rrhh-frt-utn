@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { Prisma } from "@prisma/client";
+import { employeeCreateSchema, employeeUpdateSchema } from "./validation";
 
 const CATEGORY_LABELS: Record<string, string> = {
   IDENTIDAD: "Identidad",
@@ -92,23 +93,50 @@ export async function getEmployeeById(id: string) {
 }
 
 export async function createEmployee(data: Record<string, unknown>) {
+  const parsed = employeeCreateSchema.parse(data);
   return prisma.employee.create({
-    data: data as any,
+    data: {
+      id: `EMP-${Date.now()}`,
+      firstName: parsed.firstName,
+      lastName: parsed.lastName,
+      email: parsed.email,
+      phone: parsed.phone,
+      cuil: parsed.cuil,
+      birthDate: new Date(parsed.birthDate),
+      maritalStatus: parsed.maritalStatus,
+      address: parsed.address,
+      departmentId: parsed.departmentId,
+      role: parsed.role,
+      status: parsed.status,
+      hireDate: new Date(parsed.hireDate),
+      exitDate: parsed.exitDate ? new Date(parsed.exitDate) : null,
+      emergencyContact: (parsed.emergencyContact ?? {}) as any,
+    },
   });
 }
 
 export async function updateEmployee(id: string, data: Record<string, unknown>) {
-  const { department, workedDaysThisMonth, totalDaysThisMonth, totalFiles, vigenteFiles, vencidosFiles, rechazadosFiles, documents, ...clean } = data as any;
+  const { ...rest } = data;
+  const parsed = employeeUpdateSchema.parse(rest);
+  const prismaData: Record<string, unknown> = {};
+  if (parsed.firstName !== undefined) prismaData.firstName = parsed.firstName;
+  if (parsed.lastName !== undefined) prismaData.lastName = parsed.lastName;
+  if (parsed.email !== undefined) prismaData.email = parsed.email;
+  if (parsed.phone !== undefined) prismaData.phone = parsed.phone;
+  if (parsed.cuil !== undefined) prismaData.cuil = parsed.cuil;
+  if (parsed.maritalStatus !== undefined) prismaData.maritalStatus = parsed.maritalStatus;
+  if (parsed.address !== undefined) prismaData.address = parsed.address;
+  if (parsed.departmentId !== undefined) prismaData.departmentId = parsed.departmentId;
+  if (parsed.role !== undefined) prismaData.role = parsed.role;
+  if (parsed.status !== undefined) prismaData.status = parsed.status;
+  if (parsed.hireDate !== undefined) prismaData.hireDate = new Date(parsed.hireDate);
+  if (parsed.exitDate !== undefined) prismaData.exitDate = parsed.exitDate ? new Date(parsed.exitDate) : null;
+  if (parsed.birthDate !== undefined) prismaData.birthDate = new Date(parsed.birthDate);
+  if (parsed.emergencyContact !== undefined) prismaData.emergencyContact = parsed.emergencyContact as any;
   try {
     return await prisma.employee.update({
       where: { id },
-      data: {
-        ...clean,
-        hireDate: clean.hireDate ? new Date(clean.hireDate as string) : undefined,
-        exitDate: clean.exitDate ? new Date(clean.exitDate as string) : undefined,
-        birthDate: clean.birthDate ? new Date(clean.birthDate as string) : undefined,
-        emergencyContact: clean.emergencyContact ? clean.emergencyContact : undefined,
-      },
+      data: prismaData as any,
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {

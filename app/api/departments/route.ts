@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { getDepartments, createDepartment } from "@/lib/departments";
 import { Prisma } from "@prisma/client";
+import { departmentCreateSchema } from "@/lib/validation";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -24,19 +25,19 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  if (!name) {
+  const parsed = departmentCreateSchema.safeParse(body);
+  if (!parsed.success) {
     return Response.json({ error: "El nombre es requerido" }, { status: 400 });
   }
 
   try {
-    const data = await createDepartment(name);
+    const data = await createDepartment(parsed.data.name);
     return Response.json({ data }, { status: 201 });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
       return Response.json({ error: "Ya existe un departamento con ese nombre" }, { status: 409 });
     }
-    const message = err instanceof Error ? err.message : "Error creating department";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("Error creating department:", err);
+    return Response.json({ error: "Error al crear departamento" }, { status: 500 });
   }
 }

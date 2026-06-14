@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { ALLOWED_DOCUMENT_MIME_TYPES, MAX_DOCUMENT_SIZE } from "@/lib/validation";
 
 const CATEGORY_MAP: Record<string, string> = {
   Identidad: "IDENTIDAD",
@@ -33,6 +34,14 @@ export async function POST(
 
   if (!file || !name?.trim() || !categoryLabel) {
     return Response.json({ error: "Faltan campos requeridos" }, { status: 400 });
+  }
+
+  if (!ALLOWED_DOCUMENT_MIME_TYPES.includes(file.type as any)) {
+    return Response.json({ error: "Tipo de archivo no permitido. Use PDF, JPG, PNG, WebP o Word" }, { status: 400 });
+  }
+
+  if (file.size > MAX_DOCUMENT_SIZE) {
+    return Response.json({ error: "El documento no puede superar los 20MB" }, { status: 400 });
   }
 
   const category = CATEGORY_MAP[categoryLabel] ?? "IDENTIDAD";

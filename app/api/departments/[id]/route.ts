@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { updateDepartment, deactivateDepartment } from "@/lib/departments";
+import { departmentUpdateSchema } from "@/lib/validation";
 
 export async function PUT(
   request: Request,
@@ -21,21 +22,20 @@ export async function PUT(
       const data = await deactivateDepartment(params.id);
       return Response.json({ data });
     }
-    const updateData: { name?: string; active?: boolean } = {};
-    if (typeof body.name === "string" && body.name.trim()) updateData.name = body.name.trim();
-    if (typeof body.active === "boolean") updateData.active = body.active;
-    if (Object.keys(updateData).length === 0) {
+    const parsed = departmentUpdateSchema.parse(body);
+    if (Object.keys(parsed).length === 0) {
       return Response.json({ error: "No hay campos para actualizar" }, { status: 400 });
     }
-    const data = await updateDepartment(params.id, updateData);
+    const data = await updateDepartment(params.id, parsed);
     return Response.json({ data });
   } catch (err) {
-    // deactivateDepartment lanza Error simple (sin .code) cuando hay empleados activos → 409
-    // Los errores de Prisma tienen .code → 500
+    if (err instanceof Error && err.name === "ZodError") {
+      return Response.json({ error: "Datos inválidos" }, { status: 400 });
+    }
     if (err instanceof Error && !(err as any).code) {
       return Response.json({ error: err.message }, { status: 409 });
     }
-    const message = err instanceof Error ? err.message : "Error updating department";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("Error updating department:", err);
+    return Response.json({ error: "Error al actualizar departamento" }, { status: 500 });
   }
 }

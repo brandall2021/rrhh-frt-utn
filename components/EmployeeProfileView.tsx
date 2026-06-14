@@ -934,10 +934,10 @@ export default function EmployeeProfileView({
           <div className="bg-brand/10 border border-brand/20 p-4 rounded-3xl space-y-2">
             <h4 className="text-brand-light font-bold text-xs flex items-center gap-1.5 leading-none">
               <Lock className="w-3.5 h-3.5" />
-              Bóveda Digital Encriptada
+              Bóveda Digital
             </h4>
             <p className="text-[11px] text-slate-300 leading-normal antialiased">
-              Toda la documentación está cifrada en reposo con AES-256 e integrada al sistema de firma digital.
+              Documentos almacenados de forma segura con control de acceso y registro de versiones.
             </p>
           </div>
         </aside>

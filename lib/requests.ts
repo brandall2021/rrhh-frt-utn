@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import type { RequestState } from "@prisma/client";
+import { requestCreateSchema } from "./validation";
 
 export async function getRequests(filters?: { state?: RequestState; employeeId?: string }) {
   const records = await prisma.leaveRequest.findMany({
@@ -35,16 +36,19 @@ export async function getRequests(filters?: { state?: RequestState; employeeId?:
   }));
 }
 
-export async function createRequest(data: {
-  employeeId: string;
-  type: string;
-  startDate: Date;
-  endDate: Date;
-  days: number;
-  observations?: string;
-  attachedFile?: string;
-}) {
-  return prisma.leaveRequest.create({ data: data as any });
+export async function createRequest(data: Record<string, unknown>) {
+  const parsed = requestCreateSchema.parse(data);
+  return prisma.leaveRequest.create({
+    data: {
+      employeeId: parsed.employeeId,
+      type: parsed.type,
+      startDate: new Date(parsed.startDate),
+      endDate: new Date(parsed.endDate),
+      days: parsed.days,
+      observations: parsed.observations,
+      attachedFile: parsed.attachedFile,
+    },
+  });
 }
 
 export const VALID_TRANSITIONS: Record<string, RequestState[]> = {

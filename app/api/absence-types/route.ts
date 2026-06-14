@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import type { AbsenceType } from "@/types";
+import { absenceTypeArraySchema } from "@/lib/validation";
 
 const DATA_DIR = join(process.cwd(), "data");
 const DATA_FILE = join(DATA_DIR, "absence-types.json");
@@ -53,12 +54,12 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const types: AbsenceType[] = body.types;
-    if (!Array.isArray(types)) {
-      return Response.json({ error: "Invalid data" }, { status: 400 });
+    const parsed = absenceTypeArraySchema.safeParse(body.types);
+    if (!parsed.success) {
+      return Response.json({ error: "Datos de tipos de ausencia inválidos" }, { status: 400 });
     }
-    await save(types);
-    return Response.json({ data: types });
+    await save(parsed.data);
+    return Response.json({ data: parsed.data });
   } catch {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }

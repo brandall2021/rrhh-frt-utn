@@ -22,7 +22,7 @@ export async function PUT(
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  let body: unknown;
+  let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
@@ -30,10 +30,14 @@ export async function PUT(
   }
 
   try {
-    const employee = await updateEmployee(params.id, body as any);
+    const employee = await updateEmployee(params.id, body);
     if (!employee) return Response.json({ error: "Not found" }, { status: 404 });
     return Response.json({ data: employee });
-  } catch (err: any) {
-    return Response.json({ error: err.message ?? "Error updating employee" }, { status: 500 });
+  } catch (err) {
+    console.error("Error updating employee:", err);
+    if (err instanceof Error && err.name === "ZodError") {
+      return Response.json({ error: "Datos inválidos", details: (err as any).issues }, { status: 400 });
+    }
+    return Response.json({ error: "Error al actualizar empleado" }, { status: 500 });
   }
 }

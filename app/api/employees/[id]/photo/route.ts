@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join, extname } from "path";
+import { ALLOWED_MIME_TYPES, MAX_PHOTO_SIZE } from "@/lib/validation";
 
 export async function POST(
   request: Request,
@@ -19,6 +20,14 @@ export async function POST(
 
   const file = formData.get("photo") as File | null;
   if (!file) return Response.json({ error: "No photo file provided" }, { status: 400 });
+
+  if (!ALLOWED_MIME_TYPES.includes(file.type as any)) {
+    return Response.json({ error: "Tipo de archivo no permitido. Use JPG, PNG, WebP o GIF" }, { status: 400 });
+  }
+
+  if (file.size > MAX_PHOTO_SIZE) {
+    return Response.json({ error: "La foto no puede superar los 5MB" }, { status: 400 });
+  }
 
   const ext = extname(file.name) || ".jpg";
   const fileName = `${params.id}${ext}`;

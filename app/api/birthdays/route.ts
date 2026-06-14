@@ -10,7 +10,7 @@ export async function GET() {
     const data = await getUpcomingBirthdays();
     return Response.json({ data });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Error fetching birthdays";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("Error fetching birthdays:", err);
+    return Response.json({ error: "Error al obtener cumpleaños" }, { status: 500 });
   }
 }
