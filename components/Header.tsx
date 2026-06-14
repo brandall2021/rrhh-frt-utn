@@ -35,15 +35,8 @@ export default function Header({
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange("dashboard")}>
-          <img
-            src="/images/logo-face-white.png"
-            alt="FACE - UNT"
-            className="h-7 w-auto object-contain"
-          />
-          <span className="text-[17px] font-bold tracking-tight text-white font-sans antialiased hover:text-brand-light transition-colors">
-            FACE · UNT
-          </span>
+        <div className="w-8 h-8 rounded-lg bg-brand/20 border border-brand/30 flex items-center justify-center text-brand-light font-bold text-xs cursor-pointer" onClick={() => onViewChange("dashboard")}>
+          F
         </div>
 
         {/* Global Toolbar Horizontal Navigation */}
