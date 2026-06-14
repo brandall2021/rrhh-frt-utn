@@ -1,10 +1,6 @@
 "use client";
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   FileBarChart2,
@@ -14,12 +10,25 @@ import {
   TrendingUp,
   User,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Cake,
+  Edit,
+  Info,
+  Trash2,
+  X,
+  Download,
 } from "lucide-react";
-import { MonthlyAbsenceStat } from "@/types";
+import { MonthlyAbsenceStat, Employee, AbsenceType, Absence } from "@/types";
+import {
+  getCalendarDays,
+  MONTH_NAMES_SPANISH,
+  MONTH_SHORT_NAMES_SPANISH,
+  WEEKDAYS_SPANISH,
+  COLOR_CONFIGS,
+  formatDateToISO,
+} from "@/lib/calendar";
 
-// NOTE: monthlyAbsenceStats was previously imported from src/data.ts (Vite).
-// In Next.js this will come from the API layer (Task 9 / Task 13).
-// Inlined here as a stub until the API layer is wired in.
 const monthlyAbsenceStats: MonthlyAbsenceStat[] = [
   { month: "Ene", particular: 40, enfermedad: 20, compensatorio: 10, estudio: 12 },
   { month: "Feb", particular: 30, enfermedad: 45, compensatorio: 8, estudio: 5 },
@@ -35,7 +44,17 @@ export default function ReportsView() {
   const [activeReportYear, setActiveReportYear] = useState("2025");
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
 
-  // Mini summary values
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [absenceTypes, setAbsenceTypes] = useState<AbsenceType[]>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [absences, setAbsences] = useState<Absence[]>([]);
+  const [calendarYear, setCalendarYear] = useState(2025);
+  const [selectedMonthTab, setSelectedMonthTab] = useState<string>("Todos");
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [selectedDayDetail, setSelectedDayDetail] = useState<{
+    dateStr: string; dayNum: number; monthIndex: number; absence?: Absence; absenceType?: AbsenceType;
+  } | null>(null);
+
   const kpis = [
     { label: "Particular", days: 142, pct: "+8% vs año anterior", color: "bg-[#eff6ff]", border: "border-[#3b82f6]/20", text: "text-[#3b82f6]" },
     { label: "Médica / Enfermedad", days: 87, pct: "-2% vs año anterior", color: "bg-[#fef2f2]", border: "border-[#ef4444]/20", text: "text-[#ef4444]" },
@@ -43,7 +62,6 @@ export default function ReportsView() {
     { label: "Estudio / Académico", days: 48, pct: "S/C vs año anterior", color: "bg-[#ecfdf5]", border: "border-[#10b981]/20", text: "text-[#10b981]" },
   ];
 
-  // Employee rankings
   const rankings = [
     { name: "Julián Sánchez", id: "EMP-4492", days: 18, dept: "Recursos Humanos", progress: 90 },
     { name: "María López", id: "EMP-3108", days: 15, dept: "Operaciones", progress: 75 },
@@ -52,10 +70,78 @@ export default function ReportsView() {
     { name: "Sofía Blanco", id: "EMP-7721", days: 5, dept: "Operaciones", progress: 25 },
   ];
 
-  // Calculate maximum total absences across months to scale bar height
   const maxTotalDays = Math.max(
     ...monthlyAbsenceStats.map((s) => s.particular + s.enfermedad + s.compensatorio + s.estudio)
   );
+
+  useEffect(() => {
+    fetch("/api/employees").then(r => r.json()).then(({ data }) => setEmployees(data ?? [])).catch(() => {});
+    fetch("/api/absence-types").then(r => r.json()).then(({ data }) => setAbsenceTypes(data ?? [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!selectedEmployeeId) { setAbsences([]); return; }
+    fetch(`/api/employees/${selectedEmployeeId}/absences`)
+      .then(r => r.json())
+      .then(({ data }) => setAbsences(data ?? []))
+      .catch(() => setAbsences([]));
+  }, [selectedEmployeeId]);
+
+  const selectedEmployee = employees.find(e => e.id === selectedEmployeeId) ?? null;
+
+  const employeeAbsences = absences.filter(
+    (a) => a.employeeId === selectedEmployeeId && a.date.startsWith(String(calendarYear))
+  );
+
+  const absencesByDateMap = React.useMemo(() => {
+    const map = new Map<string, Absence>();
+    employeeAbsences.forEach((a) => map.set(a.date, a));
+    return map;
+  }, [employeeAbsences]);
+
+  const statsByType = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    absenceTypes.forEach((t) => { counts[t.id] = 0; });
+    employeeAbsences.forEach((a) => {
+      if (counts[a.absenceTypeId] !== undefined) counts[a.absenceTypeId]++;
+      else counts[a.absenceTypeId] = 1;
+    });
+    return counts;
+  }, [employeeAbsences, absenceTypes]);
+
+  const handleQuickAddAbsence = async (dateStr: string, typeId: string) => {
+    const withoutExisting = absences.filter(
+      (a) => !(a.employeeId === selectedEmployeeId && a.date === dateStr)
+    );
+    const newAbsence: Absence = {
+      id: `abs_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      employeeId: selectedEmployeeId,
+      absenceTypeId: typeId,
+      date: dateStr,
+      notes: "Registro rápido",
+    };
+    const updated = [...withoutExisting, newAbsence];
+    setAbsences(updated);
+    setShowDayModal(false);
+    await fetch(`/api/employees/${selectedEmployeeId}/absences`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ absences: updated }),
+    }).catch(() => {});
+  };
+
+  const handleDeleteAbsence = async (dateStr: string) => {
+    const updated = absences.filter(
+      (a) => !(a.employeeId === selectedEmployeeId && a.date === dateStr)
+    );
+    setAbsences(updated);
+    setShowDayModal(false);
+    await fetch(`/api/employees/${selectedEmployeeId}/absences`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ absences: updated }),
+    }).catch(() => {});
+  };
 
   return (
     <motion.div
@@ -64,7 +150,6 @@ export default function ReportsView() {
       transition={{ duration: 0.35, ease: "easeOut" }}
       className="space-y-6 text-left"
     >
-      {/* Report selector */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
         <div>
           <h1 className="text-xl font-extrabold text-white tracking-tight">
@@ -92,17 +177,8 @@ export default function ReportsView() {
         </div>
       </div>
 
-      {/* KPI Cards row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k, i) => {
-          // Map colors to bento dark mode equivalents
-          const bentoColor = i === 0
-            ? "bg-slate-900/50 border-slate-800"
-            : i === 1
-            ? "bg-slate-900/50 border-slate-800"
-            : i === 2
-            ? "bg-slate-900/50 border-slate-800"
-            : "bg-slate-900/50 border-slate-800";
           const bentoText = i === 0
             ? "text-brand-light"
             : i === 1
@@ -114,7 +190,7 @@ export default function ReportsView() {
           return (
             <div
               key={i}
-              className={`${bentoColor} border p-4 rounded-3xl hover:border-slate-700/60 transition-all text-left flex flex-col justify-between min-h-[110px]`}
+              className="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl hover:border-slate-700/60 transition-all text-left flex flex-col justify-between min-h-[110px]"
             >
               <div>
                 <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wide">
@@ -129,7 +205,6 @@ export default function ReportsView() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Complex Stacked Bar chart display */}
         <section className="col-span-12 lg:col-span-8 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-colors">
           <div className="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
             <div>
@@ -141,7 +216,6 @@ export default function ReportsView() {
               </p>
             </div>
 
-            {/* Color keys legend */}
             <div className="hidden sm:flex gap-3 text-[10px] font-semibold text-slate-400">
               <span className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-sm bg-brand"></span>Particular
@@ -158,11 +232,9 @@ export default function ReportsView() {
             </div>
           </div>
 
-          {/* Interactive Stacked Bar Grid */}
           <div className="relative h-64 w-full flex items-end gap-2 md:gap-5 px-2 select-none border-b border-slate-800 pb-2">
             {monthlyAbsenceStats.map((stat, idx) => {
               const totalDays = stat.particular + stat.enfermedad + stat.compensatorio + stat.estudio;
-              // Normalize height percentage relative to maximum total days
               const heightPercent = (totalDays / maxTotalDays) * 90;
 
               const partPct = (stat.particular / totalDays) * 100;
@@ -177,7 +249,6 @@ export default function ReportsView() {
                   onMouseEnter={() => setHoveredBarIndex(idx)}
                   onMouseLeave={() => setHoveredBarIndex(null)}
                 >
-                  {/* Floating tooltip */}
                   <AnimatePresence>
                     {hoveredBarIndex === idx && (
                       <motion.div
@@ -210,7 +281,6 @@ export default function ReportsView() {
                     )}
                   </AnimatePresence>
 
-                  {/* Vertically stacked bars container */}
                   <div
                     className="w-full flex flex-col rounded-t-lg overflow-hidden transition-all group-hover:opacity-90 bg-slate-950/70"
                     style={{ height: `${heightPercent}%` }}
@@ -221,7 +291,6 @@ export default function ReportsView() {
                     <div style={{ height: `${estPct}%` }} className="bg-emerald-500 w-full" title="Estudio"></div>
                   </div>
 
-                  {/* Horizontal Month labels */}
                   <span className="text-[10px] font-bold text-slate-400 mt-2 block">
                     {stat.month}
                   </span>
@@ -230,7 +299,6 @@ export default function ReportsView() {
             })}
           </div>
 
-          {/* Bullet Highlight Info below chart */}
           <div className="mt-5 p-4 bg-brand/10 border border-brand/20 rounded-2xl flex items-start gap-3">
             <TrendingUp className="w-4 h-4 text-brand-light mt-0.5 shrink-0" />
             <p className="text-xs text-slate-300 leading-relaxed">
@@ -239,7 +307,6 @@ export default function ReportsView() {
           </div>
         </section>
 
-        {/* Ranking List Table */}
         <aside className="col-span-12 lg:col-span-4 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-colors space-y-4">
           <div>
             <h3 className="text-xs font-extrabold text-white tracking-wide">
@@ -261,7 +328,6 @@ export default function ReportsView() {
                   <strong className="text-white">{r.days} días</strong>
                 </div>
 
-                {/* Simulated horizontal progress line */}
                 <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
@@ -295,6 +361,260 @@ export default function ReportsView() {
           </div>
         </aside>
       </div>
+
+      {/* Attendance Calendar Section */}
+      <section className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:border-slate-700/60 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-4">
+          <div>
+            <h3 className="text-xs font-extrabold text-white tracking-wide flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-brand-light" />
+              Calendario de Asistencias
+            </h3>
+            <p className="text-[10px] text-slate-400 mt-0.5">
+              Visualizá y gestioná las inasistencias por empleado.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedEmployeeId}
+              onChange={(e) => setSelectedEmployeeId(e.target.value)}
+              className="bg-slate-950 border border-slate-700 text-xs text-slate-200 p-2 rounded-xl focus:outline-none focus:border-brand/50 min-w-[200px]"
+            >
+              <option value="">Seleccionar empleado</option>
+              {employees.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.lastName}, {emp.firstName} — {emp.department}
+                </option>
+              ))}
+            </select>
+
+            {selectedEmployee && (
+              <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setCalendarYear((p) => p - 1)}
+                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <ChevronLeft size={13} />
+                </button>
+                <span className="px-2 font-bold text-brand-light text-xs">{calendarYear}</span>
+                <button
+                  onClick={() => setCalendarYear((p) => p + 1)}
+                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {!selectedEmployee ? (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+            <User className="w-12 h-12 mb-3 opacity-30" />
+            <p className="text-sm font-medium">Seleccioná un empleado</p>
+            <p className="text-xs mt-1">Elegí un empleado para ver su calendario de asistencias</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center gap-1.5 mb-4 bg-slate-950/30 border border-slate-800 p-2.5 rounded-xl">
+              <span className="text-[9px] text-slate-500 uppercase tracking-widest font-semibold mr-1">
+                Resumen:
+              </span>
+              {absenceTypes.map((type) => {
+                const count = statsByType[type.id] || 0;
+                const config = COLOR_CONFIGS[type.color as keyof typeof COLOR_CONFIGS] || COLOR_CONFIGS.red;
+                return (
+                  <div key={type.id} className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg border text-[10px] font-semibold ${config.badgeColor}`}>
+                    <span className="w-1 h-1 rounded-full bg-current" />
+                    <span className="text-white text-[10px]">{count}</span>
+                    <span className="text-slate-400 font-normal hidden xs:inline text-[10px]">{type.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-1 border-b border-slate-800 pb-3 mb-4 overflow-x-auto scrollbar-none">
+              <button
+                onClick={() => setSelectedMonthTab("Todos")}
+                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border cursor-pointer shrink-0 ${
+                  selectedMonthTab === "Todos"
+                    ? "bg-brand text-white border-brand/40"
+                    : "bg-transparent text-slate-400 hover:text-white hover:bg-slate-900 border-transparent"
+                }`}
+              >
+                Todos
+              </button>
+              {MONTH_SHORT_NAMES_SPANISH.map((shortName, idx) => (
+                <button
+                  key={shortName}
+                  onClick={() => setSelectedMonthTab(shortName)}
+                  className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border cursor-pointer shrink-0 ${
+                    selectedMonthTab === shortName
+                      ? "bg-transparent text-brand-light border-brand/40"
+                      : "bg-transparent text-slate-400 hover:text-white hover:bg-slate-900 border-transparent"
+                  }`}
+                >
+                  {shortName}
+                </button>
+              ))}
+            </div>
+
+            <div className="bg-slate-950/30 border border-slate-800 rounded-xl p-2.5 mb-4 text-[10px] text-slate-400 flex items-center gap-2">
+              <Info size={13} className="text-brand-light shrink-0" />
+              <span>
+                <strong className="text-white uppercase text-[9px] tracking-wider mr-1">Atajo:</strong>
+                Tocá un día para registrar ausencias rápidas o eliminar registros.
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {MONTH_NAMES_SPANISH.map((monthName, monthIdx) => {
+                const shortName = MONTH_SHORT_NAMES_SPANISH[monthIdx];
+                if (selectedMonthTab !== "Todos" && selectedMonthTab !== shortName) return null;
+
+                const days = getCalendarDays(calendarYear, monthIdx);
+
+                return (
+                  <div key={monthName} className="bg-slate-950/30 border border-slate-800 rounded-xl p-2 flex flex-col hover:border-slate-700/60 transition-colors">
+                    <h3 className="text-center text-xs font-bold text-white pb-1.5 border-b border-slate-800 mb-1.5">
+                      {monthName}
+                    </h3>
+
+                    <div className="grid grid-cols-7 gap-px text-center text-[8px] font-bold text-slate-500 mb-0.5 uppercase tracking-wider">
+                      {WEEKDAYS_SPANISH.map((wd, wdIdx) => (
+                        <div key={wdIdx} className={`py-0.5 ${wd === "D" || wd === "S" ? "text-red-400/60" : ""}`}>{wd}</div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-px">
+                      {days.map((dayNum, dayIdx) => {
+                        if (dayNum === null) return <div key={`e-${dayIdx}`} className="aspect-square" />;
+
+                        const dateStr = formatDateToISO(calendarYear, monthIdx, dayNum);
+                        const absence = absencesByDateMap.get(dateStr);
+                        const isWeekend = dayIdx % 7 === 0 || dayIdx % 7 === 6;
+
+                        let absenceType: AbsenceType | undefined;
+                        let colorConfig = COLOR_CONFIGS.red;
+
+                        if (absence) {
+                          absenceType = absenceTypes.find((t) => t.id === absence.absenceTypeId);
+                          if (absenceType) {
+                            colorConfig = COLOR_CONFIGS[absenceType.color as keyof typeof COLOR_CONFIGS] || COLOR_CONFIGS.red;
+                          }
+                        }
+
+                        return (
+                          <button
+                            key={`d-${dayNum}`}
+                            onClick={() => {
+                              setSelectedDayDetail({ dateStr, dayNum, monthIndex: monthIdx, absence, absenceType });
+                              setShowDayModal(true);
+                            }}
+                            className={`relative min-h-[28px] rounded flex flex-col items-center justify-center text-[9px] select-none hover:ring-1 hover:ring-brand-light/50 transition-all cursor-pointer ${
+                              absence
+                                ? `${colorConfig.calendarCell} ring-1 ring-current/30`
+                                : isWeekend
+                                  ? "bg-slate-950/40 text-slate-600"
+                                  : "bg-slate-950/60 text-slate-400 border border-slate-800/50"
+                            }`}
+                          >
+                            <span className="font-semibold leading-none">{dayNum}</span>
+                            {absence && absenceType && (
+                              <span className={`text-[7px] font-bold leading-none mt-px ${colorConfig.accentText}`}>
+                                {absenceType.code}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* Day Detail Modal */}
+      {showDayModal && selectedDayDetail && selectedEmployee && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 w-full sm:max-w-sm sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-950/50 border-b border-slate-800">
+              <span className="text-[10px] uppercase tracking-widest text-brand-light font-bold">
+                {selectedDayDetail.dayNum} {MONTH_SHORT_NAMES_SPANISH[selectedDayDetail.monthIndex]} {calendarYear}
+              </span>
+              <button
+                onClick={() => setShowDayModal(false)}
+                className="text-slate-500 hover:text-white rounded p-0.5 hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {selectedDayDetail.absence ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block uppercase tracking-widest mb-0.5 font-bold">Tipo</span>
+                      <strong className="text-sm text-white">{selectedDayDetail.absenceType?.name}</strong>
+                    </div>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
+                      COLOR_CONFIGS[selectedDayDetail.absenceType?.color as keyof typeof COLOR_CONFIGS]?.calendarCell || COLOR_CONFIGS.red.calendarCell
+                    }`}>
+                      {selectedDayDetail.absenceType?.code}
+                    </div>
+                  </div>
+
+                  {selectedDayDetail.absence.notes && (
+                    <div className="text-xs bg-slate-950/40 border border-slate-800 p-3 rounded-xl text-slate-300">
+                      <span className="text-[9px] text-brand-light block uppercase font-bold tracking-wider mb-1">Observaciones:</span>
+                      {selectedDayDetail.absence.notes}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => handleDeleteAbsence(selectedDayDetail.dateStr)}
+                    className="w-full flex items-center justify-center gap-2 bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-900/30 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <Trash2 size={13} />
+                    Eliminar Registro
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-bold text-brand-light block uppercase tracking-wider">
+                    Registrar inasistencia:
+                  </span>
+                  <div className="grid grid-cols-1 gap-2">
+                    {absenceTypes.map((t) => {
+                      const conf = COLOR_CONFIGS[t.color as keyof typeof COLOR_CONFIGS] || COLOR_CONFIGS.red;
+                      return (
+                        <button
+                          key={t.id}
+                          onClick={() => handleQuickAddAbsence(selectedDayDetail.dateStr, t.id)}
+                          className="flex items-center justify-between w-full hover:bg-slate-800/60 border border-slate-800 bg-slate-950/40 p-2.5 rounded-xl text-left text-xs transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${conf.accentText} bg-current`} />
+                            <span className="text-white font-medium">{t.name}</span>
+                          </div>
+                          <span className="font-mono text-[9px] bg-slate-950 px-1.5 py-0.5 rounded text-slate-500 font-bold uppercase">
+                            {t.code}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
