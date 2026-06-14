@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2, Sun, Moon } from "lucide-react";
+import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2, Sun, Moon, Menu, X } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 interface HeaderProps {
@@ -13,6 +13,7 @@ interface HeaderProps {
   onViewChange: (view: string) => void;
   searchTerm: string;
   onSearchChange: (term: string) => void;
+  onToggleSidebar?: () => void;
 }
 
 export default function Header({
@@ -20,11 +21,20 @@ export default function Header({
   onViewChange,
   searchTerm,
   onSearchChange,
+  onToggleSidebar,
 }: HeaderProps) {
   return (
-    <header className="h-14 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border)] flex justify-between items-center px-5 sticky top-0 z-50 select-none">
+    <header className="h-14 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border)] flex justify-between items-center px-3 md:px-5 sticky top-0 z-50 select-none">
       {/* Brand Logo and Title */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2 md:gap-6">
+        {/* Hamburger */}
+        <button
+          onClick={onToggleSidebar}
+          className="md:hidden p-2 -ml-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
+          aria-label="Toggle sidebar"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange("dashboard")}>
           <img
             src="/images/logo-face-white.png"

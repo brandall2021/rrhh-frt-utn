@@ -14,22 +14,36 @@ import {
   HelpCircle,
   LogOut,
   Plus,
+  X,
 } from "lucide-react";
 
 interface SidebarProps {
   currentView: string;
   onViewChange: (view: string) => void;
   onNewRequestClick: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export default function Sidebar({
   currentView,
   onViewChange,
   onNewRequestClick,
+  isOpen,
+  onClose,
 }: SidebarProps) {
-  return (
-    <aside className="w-64 h-[calc(100vh-3.5rem)] bg-[var(--bg-primary)]/50 border-r border-[var(--border)] flex flex-col py-5 shrink-0 select-none text-[var(--text-secondary)]">
-      {/* Admin Panel Profile */}
+  const sidebarContent = (
+    <>
+      <div className="flex items-center justify-between px-5 mb-4 md:hidden">
+        <span className="text-sm font-bold text-white">Menú</span>
+        <button
+          onClick={onClose}
+          className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
       <div className="px-5 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-brand/20 border border-brand/30 flex items-center justify-center text-brand-light font-bold text-xs">
@@ -45,7 +59,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Global Action Button */}
         <button
           onClick={onNewRequestClick}
           className="w-full mt-5 bg-brand hover:bg-brand-hover text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 cursor-pointer"
@@ -55,7 +68,6 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* Primary Navigation Links */}
       <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto">
         <button
           onClick={() => onViewChange("dashboard")}
@@ -118,7 +130,6 @@ export default function Sidebar({
         </button>
       </nav>
 
-      {/* Footer Support/Operations */}
       <div className="px-3 pt-4 border-t border-slate-900 space-y-1">
         <button
           onClick={() => alert("Soporte Técnico FACE UNT - Central de Ayuda activa.")}
@@ -135,6 +146,24 @@ export default function Sidebar({
           <span>Cerrar Sesión</span>
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile sidebar (overlay) */}
+      <aside
+        className={`md:hidden fixed top-14 left-0 bottom-0 w-72 bg-[var(--bg-primary)] border-r border-[var(--border)] flex flex-col py-5 z-40 select-none text-[var(--text-secondary)] transition-transform duration-200 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-64 h-[calc(100vh-3.5rem)] bg-[var(--bg-primary)]/50 border-r border-[var(--border)] flex-col py-5 shrink-0 select-none text-[var(--text-secondary)]">
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
