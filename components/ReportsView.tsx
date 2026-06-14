@@ -12,8 +12,6 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Cake,
-  Edit,
   Info,
   Trash2,
   X,
@@ -390,19 +388,56 @@ export default function ReportsView() {
             </select>
 
             {selectedEmployee && (
-              <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setCalendarYear((p) => p - 1)}
+                    className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                  >
+                    <ChevronLeft size={13} />
+                  </button>
+                  <span className="px-2 font-bold text-brand-light text-xs">{calendarYear}</span>
+                  <button
+                    onClick={() => setCalendarYear((p) => p + 1)}
+                    className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                  >
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
                 <button
-                  onClick={() => setCalendarYear((p) => p - 1)}
-                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                  onClick={async () => {
+                    const { default: jsPDF } = await import("jspdf");
+                    const html2canvas = (await import("html2canvas")).default;
+                    const reportEl = document.getElementById("report-attendance-calendar");
+                    if (!reportEl) return;
+                    const canvas = await html2canvas(reportEl, {
+                      backgroundColor: "#020617",
+                      scale: 2,
+                      useCORS: true,
+                      logging: false,
+                    });
+                    const imgData = canvas.toDataURL("image/png");
+                    const pdf = new jsPDF("p", "mm", "a4");
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const imgWidth = pageWidth - 20;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 10;
+                    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight - 20;
+                    while (heightLeft > 0) {
+                      position = heightLeft - imgHeight + 10;
+                      pdf.addPage();
+                      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                      heightLeft -= pageHeight - 20;
+                    }
+                    pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${calendarYear}.pdf`);
+                  }}
+                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-slate-700"
                 >
-                  <ChevronLeft size={13} />
-                </button>
-                <span className="px-2 font-bold text-brand-light text-xs">{calendarYear}</span>
-                <button
-                  onClick={() => setCalendarYear((p) => p + 1)}
-                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <ChevronRight size={13} />
+                  <Download size={12} />
+                  PDF
                 </button>
               </div>
             )}
@@ -416,7 +451,7 @@ export default function ReportsView() {
             <p className="text-xs mt-1">Elegí un empleado para ver su calendario de asistencias</p>
           </div>
         ) : (
-          <>
+          <div id="report-attendance-calendar">
             <div className="flex flex-wrap items-center gap-1.5 mb-4 bg-slate-950/30 border border-slate-800 p-2.5 rounded-xl">
               <span className="text-[9px] text-slate-500 uppercase tracking-widest font-semibold mr-1">
                 Resumen:
@@ -534,7 +569,13 @@ export default function ReportsView() {
                 );
               })}
             </div>
-          </>
+
+            {/* Employee info footer for PDF */}
+            <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-500">
+              <span>{selectedEmployee.lastName}, {selectedEmployee.firstName} — {selectedEmployee.department}</span>
+              <span>Generado: {new Date().toLocaleDateString("es-AR")}</span>
+            </div>
+          </div>
         )}
       </section>
 
