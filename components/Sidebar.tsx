@@ -14,6 +14,7 @@ import {
   ChevronDown,
   BarChart3,
   Calendar,
+  Clock,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -26,6 +27,7 @@ interface SidebarProps {
 
 const REPORT_SUB_ITEMS = [
   { id: "reports", label: "Resumen", path: "/reports" },
+  { id: "reports-diario", label: "Reporte Diario", path: "/reports/diario" },
   { id: "reports-estadisticas", label: "Estadísticas", path: "/reports/estadisticas" },
   { id: "reports-calendario", label: "Calendario", path: "/reports/calendario" },
 ];
@@ -143,6 +145,8 @@ export default function Sidebar({
                     <BarChart3 className="w-3.5 h-3.5" />
                   ) : item.label === "Calendario" ? (
                     <Calendar className="w-3.5 h-3.5" />
+                  ) : item.label === "Reporte Diario" ? (
+                    <Clock className="w-3.5 h-3.5" />
                   ) : (
                     <span className="w-3.5 h-3.5 flex items-center justify-center">
                       <span className="w-1 h-1 rounded-full bg-current" />
