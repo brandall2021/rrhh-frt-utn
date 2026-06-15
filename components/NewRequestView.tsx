@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
   Calendar,
@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Info,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { Employee, LeaveRequest, NovedadType, RequestState } from "@/types";
 
@@ -35,6 +36,10 @@ export default function NewRequestView({
   const [startDate, setStartDate] = useState("2025-10-20");
   const [endDate, setEndDate] = useState("2025-10-22");
   const [observations, setObservations] = useState("");
+
+  // Confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState<Partial<LeaveRequest> | null>(null);
 
   // File drag & drop simulator states
   const [isDragActive, setIsDragActive] = useState(false);
@@ -74,7 +79,6 @@ export default function NewRequestView({
       return;
     }
 
-    // Calculate days count
     const d1 = new Date(startDate);
     const d2 = new Date(endDate);
     const diffTime = Math.abs(d2.getTime() - d1.getTime());
@@ -95,11 +99,19 @@ export default function NewRequestView({
       submissionDate: "2025-10-10",
     };
 
-    onSubmitRequest(requestRecord);
+    setPendingRequest(requestRecord);
+    setShowConfirmModal(true);
+  };
+
+  const confirmSubmit = () => {
+    if (!pendingRequest) return;
+    onSubmitRequest(pendingRequest);
+    setShowConfirmModal(false);
+    setPendingRequest(null);
     alert(
-      `Solicitud de ${requestRecord.type} cargada exitosamente para ${requestRecord.employeeName}.\nTendrá un conteo de ${daysCount} días corridos.`
+      `Solicitud de ${pendingRequest.type} cargada exitosamente para ${pendingRequest.employeeName}.\nTendrá un conteo de ${pendingRequest.days} días corridos.`
     );
-    onBackClick(); // Redirect to dashboard
+    onBackClick();
   };
 
   // Novedades available options with descriptive icon labels
@@ -346,6 +358,100 @@ export default function NewRequestView({
           </div>
         </aside>
       </div>
+
+      <AnimatePresence>
+        {showConfirmModal && pendingRequest && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-slate-900 border border-slate-800 w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl"
+            >
+              <div className="flex items-center justify-between px-5 py-4 bg-slate-950/50 border-b border-slate-800">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  Confirmar Solicitud
+                </h3>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="text-slate-500 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-slate-300">
+                  Revisá los datos antes de confirmar la solicitud de ausencia:
+                </p>
+
+                <div className="bg-slate-950/60 border border-slate-800 rounded-xl divide-y divide-slate-800 text-xs">
+                  <div className="flex justify-between px-4 py-3">
+                    <span className="text-slate-400">Empleado</span>
+                    <span className="text-white font-semibold text-right">{pendingRequest.employeeName}</span>
+                  </div>
+                  <div className="flex justify-between px-4 py-3">
+                    <span className="text-slate-400">Departamento</span>
+                    <span className="text-white font-semibold">{pendingRequest.department}</span>
+                  </div>
+                  <div className="flex justify-between px-4 py-3">
+                    <span className="text-slate-400">Tipo</span>
+                    <span className="text-white font-semibold">{pendingRequest.type}</span>
+                  </div>
+                  <div className="flex justify-between px-4 py-3">
+                    <span className="text-slate-400">Desde</span>
+                    <span className="text-white font-semibold font-mono text-[11px]">{pendingRequest.startDate}</span>
+                  </div>
+                  <div className="flex justify-between px-4 py-3">
+                    <span className="text-slate-400">Hasta</span>
+                    <span className="text-white font-semibold font-mono text-[11px]">{pendingRequest.endDate}</span>
+                  </div>
+                  <div className="flex justify-between px-4 py-3">
+                    <span className="text-slate-400">Días</span>
+                    <span className="text-white font-semibold">{pendingRequest.days}</span>
+                  </div>
+                  {pendingRequest.observations && (
+                    <div className="flex flex-col px-4 py-3 gap-1">
+                      <span className="text-slate-400">Observaciones</span>
+                      <span className="text-slate-200 text-[11px] leading-relaxed">{pendingRequest.observations}</span>
+                    </div>
+                  )}
+                  {pendingRequest.attachedFile && (
+                    <div className="flex justify-between px-4 py-3">
+                      <span className="text-slate-400">Archivo adjunto</span>
+                      <span className="text-slate-300 font-mono text-[11px] truncate max-w-[180px]">{pendingRequest.attachedFile}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="flex-1 bg-transparent border border-slate-700 hover:bg-slate-800 rounded-xl py-2.5 text-xs font-semibold text-slate-400 transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={confirmSubmit}
+                    className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-2.5 text-xs font-semibold transition-all cursor-pointer shadow-[0_0_15px_rgba(214,0,0,0.2)]"
+                  >
+                    Confirmar y Enviar
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
