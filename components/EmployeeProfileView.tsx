@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   UploadCloud,
   Download,
-  CheckCircle,
   XCircle,
   FileText,
   Lock,
@@ -19,7 +18,6 @@ import {
 import {
   Employee,
   DocumentRecord,
-  PaySlip,
   VersionHistoryRecord,
   LeaveRequest,
   RequestState,
@@ -54,17 +52,12 @@ export default function EmployeeProfileView({
   const [documents, setDocuments] = useState<DocumentRecord[]>(
     employee.documents ?? []
   );
-  const [paySlips, setPaySlips] = useState<PaySlip[]>([]);
   const [versionHistory, setVersionHistory] = useState<VersionHistoryRecord[]>([]);
 
   // Document action uploading
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Sign state simulation
-  const [selectedPaySlipToSign, setSelectedPaySlipToSign] = useState<PaySlip | null>(null);
-  const [signingPin, setSigningPin] = useState("");
-  const [isSigningInProcess, setIsSigningInProcess] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadDocName, setUploadDocName] = useState("");
   const [uploadCategory, setUploadCategory] = useState("Contractual");
@@ -136,7 +129,7 @@ export default function EmployeeProfileView({
   const rechazados = documents.filter((d) => d.status === "RECHAZADO").length;
 
   const handleDownloadFullZip = () => {
-    alert("Compilando legajo digital en un archivo comprimido .ZIP...\n\nContiene:\n- Información laboral de " + employee.firstName + " " + employee.lastName + "\n- 14 archivos firmados adjuntos\n- Últimos 3 recibos de sueldo verificados.");
+    alert("Compilando legajo digital en un archivo comprimido .ZIP...\n\nContiene:\n- Información laboral de " + employee.firstName + " " + employee.lastName + "\n- 14 archivos firmados adjuntos.");
   };
 
   const handleRealUpload = async (e: React.FormEvent) => {
@@ -224,39 +217,6 @@ export default function EmployeeProfileView({
         return p + 20;
       });
     }, 100);
-  };
-
-  const handleSignPaySlip = (ps: PaySlip) => {
-    if (ps.signed) return;
-    setSelectedPaySlipToSign(ps);
-  };
-
-  const submitSignPaySlip = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (signingPin.length < 4) {
-      alert("Ingrese un PIN válido de 4 dígitos.");
-      return;
-    }
-
-    setIsSigningInProcess(true);
-    setTimeout(() => {
-      setPaySlips((prev) =>
-        prev.map((p) => (p.id === selectedPaySlipToSign?.id ? { ...p, signed: true } : p))
-      );
-      setVersionHistory((prev) => [
-        {
-          id: `VH-${Date.now()}`,
-          title: `Firma Digital de Recibo - Período ${selectedPaySlipToSign?.period}`,
-          detail: "Firmado con token criptográfico por " + employee.firstName + " " + employee.lastName,
-          date: "Hoy",
-        },
-        ...prev,
-      ]);
-      setIsSigningInProcess(false);
-      setSelectedPaySlipToSign(null);
-      setSigningPin("");
-      alert("Recibo firmado digitalmente con éxito.");
-    }, 1200);
   };
 
   return (
@@ -568,70 +528,6 @@ export default function EmployeeProfileView({
                   </div>
                 </div>
 
-                {/* Recibos de Sueldo / Signed pay slips Carousel Section */}
-                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 shadow-sm text-left">
-                  <div className="flex justify-between items-center border-b border-slate-820 border-slate-800 pb-3 mb-4">
-                    <div>
-                      <h3 className="font-bold text-xs text-white tracking-wide">
-                        Recibos de Sueldo Digitales
-                      </h3>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Firma criptográfica conforme ley 25.506.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {paySlips.map((ps) => (
-                      <div
-                        key={ps.id}
-                        className="p-3.5 border border-slate-800 bg-slate-950/50 rounded-2xl flex flex-col justify-between min-h-[140px] hover:border-slate-700/60 transition-all"
-                      >
-                        <div>
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-xs font-bold text-slate-200">
-                              {ps.period}
-                            </span>
-                            {ps.signed ? (
-                              <span className="text-[8px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase">
-                                Firmado
-                              </span>
-                            ) : (
-                              <span className="text-[8px] font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20 uppercase animate-pulse">
-                                Pendiente
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-slate-400 font-mono leading-none mt-1">
-                            Generado: {ps.generatedDate}
-                          </p>
-                        </div>
-
-                        <div className="mt-4 pt-3 border-t border-slate-850/60 flex items-center justify-between">
-                          <button
-                            onClick={() => alert(`Previsualizando planilla de haberes de ${ps.period}...`)}
-                            className="text-[10px] font-bold text-slate-400 hover:text-white hover:underline cursor-pointer"
-                          >
-                            Ver Recibo
-                          </button>
-                          {ps.signed ? (
-                            <span className="text-[9px] font-medium text-slate-400 flex items-center gap-1">
-                              <CheckCircle className="w-3 h-3 text-emerald-400" />
-                              Firmado Crypt
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handleSignPaySlip(ps)}
-                              className="bg-brand hover:bg-brand-hover shadow-[0_4px_10px_rgba(214, 0, 0,0.25)] text-white text-[10px] font-bold py-1 px-3 rounded cursor-pointer transition-colors"
-                            >
-                              Firmar Digital
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </motion.div>
             )}
 
@@ -1025,68 +921,6 @@ export default function EmployeeProfileView({
         </div>
       )}
 
-      {/* Recibo Signing Modal Simulation screen */}
-      {selectedPaySlipToSign && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-900 rounded-3xl shadow-3xl border border-slate-800 max-w-sm w-full p-6 text-left"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Lock className="w-4 h-4 text-brand-light" />
-                Firmar Recibo - {selectedPaySlipToSign.period}
-              </h3>
-              <button
-                onClick={() => setSelectedPaySlipToSign(null)}
-                className="p-1 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <XCircle className="w-4 h-4 text-slate-400" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              Está a punto de firmar digitalmente su recibo de haberes correspondiente a{" "}
-              <strong>{selectedPaySlipToSign.period}</strong>. Esto equivale a una firma hológrafa.
-            </p>
-
-            <form onSubmit={submitSignPaySlip} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Ingrese su clave/PIN de firma (4 dígitos)
-                </label>
-                <input
-                  type="password"
-                  maxLength={4}
-                  required
-                  value={signingPin}
-                  onChange={(e) => setSigningPin(e.target.value.replace(/\D/g, ""))}
-                  placeholder="••••"
-                  className="w-full text-center tracking-[0.5em] bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm font-bold focus:ring-1 focus:ring-brand focus:outline-none text-slate-100"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2 flex-row">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPaySlipToSign(null)}
-                  className="flex-1 bg-transparent border border-slate-800 hover:bg-slate-800 rounded-xl py-2 text-xs font-semibold text-slate-400 cursor-pointer hover:text-white"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSigningInProcess}
-                  className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-2 text-xs font-semibold cursor-pointer disabled:opacity-50 shadow-[0_0_15px_rgba(214, 0, 0,0.2)]"
-                >
-                  {isSigningInProcess ? "Firmando..." : "Confirmar Firma"}
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
     </motion.div>
   );
 }

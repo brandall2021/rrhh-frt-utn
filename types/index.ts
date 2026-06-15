@@ -106,13 +106,6 @@ export interface DocumentRecord {
   rejectReason?: string;
 }
 
-export interface PaySlip {
-  id: string;
-  period: string; // e.g. "Julio 2024"
-  generatedDate: string;
-  signed: boolean;
-}
-
 export interface VersionHistoryRecord {
   id: string;
   title: string;

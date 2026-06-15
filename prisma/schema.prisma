@@ -44,7 +44,6 @@ model Employee {
   emergencyContact Json
   leaveRequests    LeaveRequest[]
   documents        Document[]
-  paySlips         PaySlip[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
@@ -76,16 +75,6 @@ model Document {
   rejectReason String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-}
-
-model PaySlip {
-  id            String   @id @default(cuid())
-  employee      Employee @relation(fields: [employeeId], references: [id])
-  employeeId    String
-  period        String
-  generatedDate DateTime
-  signed        Boolean  @default(false)
-  createdAt     DateTime @default(now())
 }
 
 enum EmployeeStatus {

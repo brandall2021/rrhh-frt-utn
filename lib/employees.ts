@@ -62,12 +62,11 @@ export async function getEmployeeById(id: string) {
       department: { select: { id: true, name: true } },
       leaveRequests: { orderBy: { submissionDate: "desc" } },
       documents: { orderBy: { createdAt: "desc" } },
-      paySlips: { orderBy: { generatedDate: "desc" } },
     },
   });
   if (!employee) return null;
 
-  const { department, documents, leaveRequests, paySlips, hireDate, exitDate, birthDate, createdAt, updatedAt, ...rest } = employee;
+  const { department, documents, leaveRequests, hireDate, exitDate, birthDate, createdAt, updatedAt, ...rest } = employee;
 
   return {
     ...rest,
