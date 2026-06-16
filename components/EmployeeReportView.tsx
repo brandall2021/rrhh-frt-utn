@@ -183,33 +183,38 @@ export default function EmployeeReportView({
 
             <button
               onClick={async () => {
-                const { default: jsPDF } = await import("jspdf");
-                const html2canvas = (await import("html2canvas")).default;
-                const reportEl = document.getElementById("employee-report-content");
-                if (!reportEl) return;
-                const canvas = await html2canvas(reportEl, {
-                  backgroundColor: "#020617",
-                  scale: 2,
-                  useCORS: true,
-                  logging: false,
-                });
-                const imgData = canvas.toDataURL("image/png");
-                const pdf = new jsPDF("p", "mm", "a4");
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const imgWidth = pageWidth - 20;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 10;
-                pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight - 20;
-                while (heightLeft > 0) {
-                  position = heightLeft - imgHeight + 10;
-                  pdf.addPage();
+                try {
+                  const { default: jsPDF } = await import("jspdf");
+                  const html2canvas = (await import("html2canvas")).default;
+                  const reportEl = document.getElementById("employee-report-content");
+                  if (!reportEl) return;
+                  const canvas = await html2canvas(reportEl, {
+                    backgroundColor: "#020617",
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                  });
+                  const imgData = canvas.toDataURL("image/png");
+                  const pdf = new jsPDF("p", "mm", "a4");
+                  const pageWidth = pdf.internal.pageSize.getWidth();
+                  const pageHeight = pdf.internal.pageSize.getHeight();
+                  const imgWidth = pageWidth - 20;
+                  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                  let heightLeft = imgHeight;
+                  let position = 10;
                   pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
                   heightLeft -= pageHeight - 20;
+                  while (heightLeft > 0) {
+                    position = heightLeft - imgHeight + 10;
+                    pdf.addPage();
+                    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight - 20;
+                  }
+                  pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`);
+                } catch (err) {
+                  console.error("Error al generar PDF:", err);
+                  alert("Error al generar el PDF. Algunos estilos de la página no son compatibles con la exportación.");
                 }
-                pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`);
               }}
               className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer border border-slate-700"
             >

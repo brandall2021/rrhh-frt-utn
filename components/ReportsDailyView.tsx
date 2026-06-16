@@ -59,17 +59,18 @@ export default function ReportsDailyView() {
   }, [selectedDate, fetchReport]);
 
   const handleDownloadPdf = async () => {
-    const { default: jsPDF } = await import("jspdf");
-    const html2canvas = (await import("html2canvas")).default;
-    const el = document.getElementById("report-daily-content");
-    if (!el) return;
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+      const el = document.getElementById("report-daily-content");
+      if (!el) return;
 
-    const canvas = await html2canvas(el, {
-      backgroundColor: "#020617",
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
+      const canvas = await html2canvas(el, {
+        backgroundColor: "#020617",
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
 
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
@@ -90,7 +91,11 @@ export default function ReportsDailyView() {
       heightLeft -= pageHeight - 20;
     }
 
-    pdf.save(`reporte_diario_${selectedDate}.pdf`);
+      pdf.save(`reporte_diario_${selectedDate}.pdf`);
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+      alert("Error al generar el PDF. Algunos estilos de la página no son compatibles con la exportación.");
+    }
   };
 
   const handleSendEmail = async () => {
