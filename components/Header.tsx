@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
-import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2, Sun, Moon, Menu, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2, Sun, Moon, Menu, X, Clock } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 interface HeaderProps {
@@ -23,6 +23,13 @@ export default function Header({
   onSearchChange,
   onToggleSidebar,
 }: HeaderProps) {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <header className="h-14 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border)] flex justify-between items-center px-3 md:px-5 sticky top-0 z-50 select-none">
       {/* Brand Logo and Title */}
@@ -111,6 +118,17 @@ export default function Header({
         >
           <Settings className="w-4 h-4" />
         </button>
+
+        {/* Date & Time */}
+        <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 font-mono border-r pr-3 border-slate-800 select-none">
+          <Clock className="w-3 h-3 shrink-0" />
+          <span suppressHydrationWarning>
+            {now.toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" })}
+          </span>
+          <span className="text-slate-500 font-semibold" suppressHydrationWarning>
+            {now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        </div>
 
         {/* User Admin Profiler Avatar Card */}
         <div className="flex items-center gap-2 border-l pl-3 border-slate-800">
