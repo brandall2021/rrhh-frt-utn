@@ -53,14 +53,20 @@ export default function ReportsCalendarView() {
       .catch(() => setAbsences([]));
 
     fetch(`/api/requests?employeeId=${selectedEmployeeId}`)
-      .then(r => r.json())
-      .then(({ data }) => {
-        const approved = (data ?? []).filter(
-          (r: LeaveRequest) => r.state === "APROBADO" || r.state === "PROCESADO"
-        );
-        setLeaveRequests(approved);
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
       })
-      .catch(() => setLeaveRequests([]));
+      .then(({ data }) => {
+        const mostrar = (data ?? []).filter(
+          (r: LeaveRequest) => r.state === "APROBADO" || r.state === "PROCESADO" || r.state === "PENDIENTE"
+        );
+        setLeaveRequests(mostrar);
+      })
+      .catch((err) => {
+        console.error("Error fetching leave requests:", err);
+        setLeaveRequests([]);
+      });
   }, [selectedEmployeeId]);
 
   const selectedEmployee = employees.find(e => e.id === selectedEmployeeId) ?? null;
@@ -123,10 +129,10 @@ export default function ReportsCalendarView() {
     leaveRequests.forEach((lr) => {
       const start = new Date(lr.startDate);
       const end = new Date(lr.endDate);
-      const typeKey = lr.type.toLowerCase();
-      if (counts[typeKey] !== undefined) {
+      const tipo = lr.type === "AUSENCIA" ? "ausencia" : lr.type.toLowerCase();
+      if (counts[tipo] !== undefined) {
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          if (d.getFullYear() === calendarYear) counts[typeKey]++;
+          if (d.getFullYear() === calendarYear) counts[tipo]++;
         }
       }
     });
@@ -230,14 +236,10 @@ export default function ReportsCalendarView() {
                     try {
                       const { default: jsPDF } = await import("jspdf");
                       const html2canvas = (await import("html2canvas")).default;
+                      const { getHtml2canvasOptions } = await import("@/lib/pdf");
                       const reportEl = document.getElementById("report-attendance-calendar");
                       if (!reportEl) return;
-                      const canvas = await html2canvas(reportEl, {
-                        backgroundColor: "#020617",
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                      });
+                      const canvas = await html2canvas(reportEl, getHtml2canvasOptions());
                       const imgData = canvas.toDataURL("image/png");
                       const pdf = new jsPDF("p", "mm", "a4");
                       const pageWidth = pdf.internal.pageSize.getWidth();
@@ -490,7 +492,9 @@ export default function ReportsCalendarView() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
                       <div>
-                        <span className="text-[10px] text-slate-500 block uppercase tracking-widest mb-0.5 font-bold">Licencia Aprobada</span>
+                        <span className="text-[10px] text-slate-500 block uppercase tracking-widest mb-0.5 font-bold">
+                          {selectedDayDetail.leaveRequest.state === "PENDIENTE" ? "Solicitud Pendiente" : "Licencia Aprobada"}
+                        </span>
                         <strong className="text-sm text-white">{selectedDayDetail.leaveRequest.type}</strong>
                       </div>
                       <div className={`px-2 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
@@ -517,7 +521,7 @@ export default function ReportsCalendarView() {
 
                     <div className="text-[9px] bg-slate-950/20 border border-slate-700/50 p-2 rounded-lg text-slate-400">
                       <span className="text-[8px] text-brand-light uppercase font-bold tracking-wider mr-1">Origen:</span>
-                      Solicitud aprobada — {selectedDayDetail.leaveRequest.state}
+                      {selectedDayDetail.leaveRequest.state === "PENDIENTE" ? "Solicitud pendiente de aprobación" : "Solicitud aprobada"} — {selectedDayDetail.leaveRequest.state}
                     </div>
                   </div>
                 ) : (

@@ -186,14 +186,10 @@ export default function EmployeeReportView({
                 try {
                   const { default: jsPDF } = await import("jspdf");
                   const html2canvas = (await import("html2canvas")).default;
+                  const { getHtml2canvasOptions } = await import("@/lib/pdf");
                   const reportEl = document.getElementById("employee-report-content");
                   if (!reportEl) return;
-                  const canvas = await html2canvas(reportEl, {
-                    backgroundColor: "#020617",
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                  });
+                  const canvas = await html2canvas(reportEl, getHtml2canvasOptions());
                   const imgData = canvas.toDataURL("image/png");
                   const pdf = new jsPDF("p", "mm", "a4");
                   const pageWidth = pdf.internal.pageSize.getWidth();

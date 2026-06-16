@@ -62,15 +62,11 @@ export default function ReportsDailyView() {
     try {
       const { default: jsPDF } = await import("jspdf");
       const html2canvas = (await import("html2canvas")).default;
+      const { getHtml2canvasOptions } = await import("@/lib/pdf");
       const el = document.getElementById("report-daily-content");
       if (!el) return;
 
-      const canvas = await html2canvas(el, {
-        backgroundColor: "#020617",
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
+      const canvas = await html2canvas(el, getHtml2canvasOptions());
 
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
