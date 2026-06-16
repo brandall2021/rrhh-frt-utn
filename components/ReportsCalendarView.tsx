@@ -12,7 +12,7 @@ import {
   X,
   Download,
 } from "lucide-react";
-import { Employee, AbsenceType, Absence } from "@/types";
+import { Employee, AbsenceType, Absence, LeaveRequest, NovedadType } from "@/types";
 import {
   getCalendarDays,
   MONTH_NAMES_SPANISH,
@@ -27,12 +27,13 @@ export default function ReportsCalendarView() {
   const [absenceTypes, setAbsenceTypes] = useState<AbsenceType[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [absences, setAbsences] = useState<Absence[]>([]);
-  const [calendarYear, setCalendarYear] = useState(2025);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [selectedMonthTab, setSelectedMonthTab] = useState<string>("Todos");
   const [showDayModal, setShowDayModal] = useState(false);
   const [newAbsenceNotes, setNewAbsenceNotes] = useState("");
   const [selectedDayDetail, setSelectedDayDetail] = useState<{
-    dateStr: string; dayNum: number; monthIndex: number; absence?: Absence; absenceType?: AbsenceType;
+    dateStr: string; dayNum: number; monthIndex: number; absence?: Absence; absenceType?: AbsenceType; leaveRequest?: LeaveRequest;
   } | null>(null);
 
   useEffect(() => {
@@ -41,34 +42,97 @@ export default function ReportsCalendarView() {
   }, []);
 
   useEffect(() => {
-    if (!selectedEmployeeId) { setAbsences([]); return; }
+    if (!selectedEmployeeId) {
+      setAbsences([]);
+      setLeaveRequests([]);
+      return;
+    }
     fetch(`/api/employees/${selectedEmployeeId}/absences`)
       .then(r => r.json())
       .then(({ data }) => setAbsences(data ?? []))
       .catch(() => setAbsences([]));
+
+    fetch(`/api/requests?employeeId=${selectedEmployeeId}`)
+      .then(r => r.json())
+      .then(({ data }) => {
+        const approved = (data ?? []).filter(
+          (r: LeaveRequest) => r.state === "APROBADO" || r.state === "PROCESADO"
+        );
+        setLeaveRequests(approved);
+      })
+      .catch(() => setLeaveRequests([]));
   }, [selectedEmployeeId]);
 
   const selectedEmployee = employees.find(e => e.id === selectedEmployeeId) ?? null;
+
+  const NOVEDAD_COLOR_MAP: Record<string, keyof typeof COLOR_CONFIGS> = {
+    ENFERMEDAD: "red",
+    AUSENCIA: "orange",
+    PARTICULAR: "amber",
+    ESTUDIO: "blue",
+    COMPENSATORIO: "emerald",
+    MEDICA: "purple",
+    MATERNIDAD: "pink",
+    OTROS: "slate",
+  };
+
+  const NOVEDAD_LABEL_MAP: Record<string, string> = {
+    ENFERMEDAD: "ENF",
+    AUSENCIA: "AUS",
+    PARTICULAR: "PAR",
+    ESTUDIO: "EST",
+    COMPENSATORIO: "COM",
+    MEDICA: "MED",
+    MATERNIDAD: "MAT",
+    OTROS: "OTR",
+  };
 
   const employeeAbsences = absences.filter(
     (a) => a.employeeId === selectedEmployeeId && a.date.startsWith(String(calendarYear))
   );
 
-  const absencesByDateMap = React.useMemo(() => {
-    const map = new Map<string, Absence>();
-    employeeAbsences.forEach((a) => map.set(a.date, a));
+  const combinedDayMap = React.useMemo(() => {
+    const map = new Map<string, { absence?: Absence; leaveRequest?: LeaveRequest }>();
+
+    employeeAbsences.forEach((a) => map.set(a.date, { absence: a }));
+
+    leaveRequests.forEach((lr) => {
+      const start = new Date(lr.startDate);
+      const end = new Date(lr.endDate);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dateStr = formatDateToISO(d.getFullYear(), d.getMonth(), d.getDate());
+        if (d.getFullYear() === calendarYear) {
+          const existing = map.get(dateStr) || {};
+          map.set(dateStr, { ...existing, leaveRequest: lr });
+        }
+      }
+    });
+
     return map;
-  }, [employeeAbsences]);
+  }, [employeeAbsences, leaveRequests, calendarYear]);
 
   const statsByType = React.useMemo(() => {
     const counts: Record<string, number> = {};
     absenceTypes.forEach((t) => { counts[t.id] = 0; });
+
     employeeAbsences.forEach((a) => {
       if (counts[a.absenceTypeId] !== undefined) counts[a.absenceTypeId]++;
       else counts[a.absenceTypeId] = 1;
     });
+
+    leaveRequests.forEach((lr) => {
+      const start = new Date(lr.startDate);
+      const end = new Date(lr.endDate);
+      const typeKey = lr.type.toLowerCase();
+      if (counts[typeKey] !== undefined) {
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          if (d.getFullYear() === calendarYear) counts[typeKey]++;
+        }
+      }
+    });
+
     return counts;
-  }, [employeeAbsences, absenceTypes]);
+  }, [employeeAbsences, absenceTypes, leaveRequests, calendarYear]);
 
   const handleQuickAddAbsence = async (dateStr: string, typeId: string, notes: string) => {
     const withoutExisting = absences.filter(
@@ -284,29 +348,38 @@ export default function ReportsCalendarView() {
                         if (dayNum === null) return <div key={`e-${dayIdx}`} className="aspect-square" />;
 
                         const dateStr = formatDateToISO(calendarYear, monthIdx, dayNum);
-                        const absence = absencesByDateMap.get(dateStr);
+                        const dayInfo = combinedDayMap.get(dateStr);
+                        const absence = dayInfo?.absence;
+                        const leaveRequest = dayInfo?.leaveRequest;
                         const isWeekend = dayIdx % 7 === 0 || dayIdx % 7 === 6;
+                        const hasMark = !!absence || !!leaveRequest;
 
                         let absenceType: AbsenceType | undefined;
                         let colorConfig = COLOR_CONFIGS.red;
+                        let label = "STS";
 
                         if (absence) {
                           absenceType = absenceTypes.find((t) => t.id === absence.absenceTypeId);
                           if (absenceType) {
                             colorConfig = COLOR_CONFIGS[absenceType.color as keyof typeof COLOR_CONFIGS] || COLOR_CONFIGS.red;
+                            label = absenceType.code;
                           }
+                        } else if (leaveRequest) {
+                          const novColor = NOVEDAD_COLOR_MAP[leaveRequest.type] || "slate";
+                          colorConfig = COLOR_CONFIGS[novColor];
+                          label = NOVEDAD_LABEL_MAP[leaveRequest.type] || leaveRequest.type.slice(0, 3);
                         }
 
                         return (
                           <button
                             key={`d-${dayNum}`}
                             onClick={() => {
-                              setSelectedDayDetail({ dateStr, dayNum, monthIndex: monthIdx, absence, absenceType });
+                              setSelectedDayDetail({ dateStr, dayNum, monthIndex: monthIdx, absence, absenceType, leaveRequest });
                               setNewAbsenceNotes("");
                               setShowDayModal(true);
                             }}
                             className={`relative min-h-[28px] rounded flex flex-col items-center justify-center text-[9px] select-none hover:ring-1 hover:ring-brand-light/50 transition-all cursor-pointer ${
-                              absence
+                              hasMark
                                 ? `${colorConfig.calendarCell} ring-1 ring-current/30`
                                 : isWeekend
                                   ? "bg-slate-950/40 text-slate-600"
@@ -314,9 +387,9 @@ export default function ReportsCalendarView() {
                             }`}
                           >
                             <span className="font-semibold leading-none">{dayNum}</span>
-                            {absence && absenceType && (
+                            {hasMark && (
                               <span className={`text-[7px] font-bold leading-none mt-px ${colorConfig.accentText}`}>
-                                {absenceType.code}
+                                {label}
                               </span>
                             )}
                           </button>
@@ -395,6 +468,11 @@ export default function ReportsCalendarView() {
                       </div>
                     )}
 
+                    <div className="text-[9px] bg-slate-950/20 border border-slate-700/50 p-2 rounded-lg text-slate-400">
+                      <span className="text-[8px] text-brand-light uppercase font-bold tracking-wider mr-1">Origen:</span>
+                      Registro manual
+                    </div>
+
                     <button
                       onClick={() => handleDeleteAbsence(selectedDayDetail.dateStr)}
                       className="w-full flex items-center justify-center gap-2 bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-900/30 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
@@ -402,6 +480,40 @@ export default function ReportsCalendarView() {
                       <Trash2 size={13} />
                       Eliminar Registro
                     </button>
+                  </div>
+                ) : selectedDayDetail.leaveRequest ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
+                      <div>
+                        <span className="text-[10px] text-slate-500 block uppercase tracking-widest mb-0.5 font-bold">Licencia Aprobada</span>
+                        <strong className="text-sm text-white">{selectedDayDetail.leaveRequest.type}</strong>
+                      </div>
+                      <div className={`px-2 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
+                        NOVEDAD_COLOR_MAP[selectedDayDetail.leaveRequest.type]
+                          ? COLOR_CONFIGS[NOVEDAD_COLOR_MAP[selectedDayDetail.leaveRequest.type]]?.calendarCell || COLOR_CONFIGS.red.calendarCell
+                          : COLOR_CONFIGS.red.calendarCell
+                      }`}>
+                        {NOVEDAD_LABEL_MAP[selectedDayDetail.leaveRequest.type] || selectedDayDetail.leaveRequest.type.slice(0, 3)}
+                      </div>
+                    </div>
+
+                    <div className="text-xs bg-slate-950/40 border border-slate-800 p-3 rounded-xl text-slate-300 space-y-1">
+                      <p>
+                        <span className="text-[9px] text-brand-light uppercase font-bold tracking-wider mr-1">Período:</span>
+                        {selectedDayDetail.leaveRequest.startDate} → {selectedDayDetail.leaveRequest.endDate}
+                      </p>
+                      {selectedDayDetail.leaveRequest.observations && (
+                        <p>
+                          <span className="text-[9px] text-brand-light uppercase font-bold tracking-wider mr-1">Obs:</span>
+                          {selectedDayDetail.leaveRequest.observations}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="text-[9px] bg-slate-950/20 border border-slate-700/50 p-2 rounded-lg text-slate-400">
+                      <span className="text-[8px] text-brand-light uppercase font-bold tracking-wider mr-1">Origen:</span>
+                      Solicitud aprobada — {selectedDayDetail.leaveRequest.state}
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
