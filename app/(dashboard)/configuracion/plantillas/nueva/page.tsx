@@ -7,11 +7,12 @@ import TemplateEditor from "@/components/TemplateEditor";
 export default function NewTemplatePage() {
   const router = useRouter();
 
-  const handleSave = async (data: { name: string; subject: string; body: string }) => {
+  const handleSave = async (data: { name?: string; subject: string; body: string }) => {
+    const payload = { ...data, name: data.name ?? "" };
     const res = await fetch("/api/templates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const { error } = await res.json();
