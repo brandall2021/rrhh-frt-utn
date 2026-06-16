@@ -23,6 +23,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { LeaveRequest, Conflict, NovedadType, RequestState } from "@/types";
+import { MONTH_NAMES_SPANISH, getCalendarDays } from "@/lib/calendar";
 
 // Absolute helper to get novelty styling configuration
 export function getNovedadBadgeStyles(type: NovedadType) {
@@ -97,11 +98,15 @@ export default function DashboardView({
   const totalPages = Math.ceil(pendingRequests.length / itemsPerPage) || 1;
 
   // Selected date on the Calendar widget
-  const [currentCalendarMonth, setCurrentCalendarMonth] = useState("Octubre 2025");
+  const today = new Date();
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [calYear, setCalYear] = useState(today.getFullYear());
   const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(null);
 
-  // Quick Calendar Event highlights mapping (e.g. October 2025)
-  // Day 15, 16, 17: ES (Estudio - Martina). Day 18: MD (Médica - Sofia). Day 20: PA (Particular - Javier)
+  const currentCalendarMonth = `${MONTH_NAMES_SPANISH[calMonth]} ${calYear}`;
+  const calendarDays = getCalendarDays(calYear, calMonth);
+
+  // Quick Calendar Event highlights mapping
   const calendarEvents: Record<number, { type: NovedadType; code: string; name: string }> = {
     15: { type: NovedadType.ESTUDIO, code: "ES", name: "Martina Rodriguez" },
     16: { type: NovedadType.ESTUDIO, code: "ES", name: "Martina Rodriguez" },
@@ -458,11 +463,17 @@ export default function DashboardView({
               </h3>
               <div className="flex gap-1.5">
                 <ChevronLeft
-                  onClick={() => setCurrentCalendarMonth("Septiembre 2025")}
+                  onClick={() => {
+                    if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
+                    else setCalMonth(m => m - 1);
+                  }}
                   className="w-4 h-4 text-slate-400 cursor-pointer hover:text-white"
                 />
                 <ChevronRight
-                  onClick={() => setCurrentCalendarMonth("Noviembre 2025")}
+                  onClick={() => {
+                    if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); }
+                    else setCalMonth(m => m + 1);
+                  }}
                   className="w-4 h-4 text-slate-400 cursor-pointer hover:text-white"
                 />
               </div>
@@ -482,18 +493,8 @@ export default function DashboardView({
             </div>
 
             <div className="grid grid-cols-7 gap-1 font-sans">
-              {/* Spacer offset for Tuesday start (October 2025 starts on Tuesday, Wed = 1) */}
-              <div className="h-8 flex items-center justify-center text-[10px] opacity-10 text-slate-500">28</div>
-              <div className="h-8 flex items-center justify-center text-[10px] opacity-10 text-slate-500">29</div>
-              <div className="h-8 flex items-center justify-center text-[10px] opacity-10 text-slate-500">30</div>
-              <div className="h-8 flex items-center justify-center text-[10px] text-slate-400">1</div>
-              <div className="h-8 flex items-center justify-center text-[10px] text-slate-400">2</div>
-              <div className="h-8 flex items-center justify-center text-[10px] text-slate-400">3</div>
-              <div className="h-8 flex items-center justify-center text-[10px] text-slate-400">4</div>
-
-              {/* Render dynamic days */}
-              {Array.from({ length: 27 }, (_, idx) => {
-                const dayNum = idx + 5;
+              {calendarDays.map((dayNum, idx) => {
+                if (dayNum === null) return <div key={`e-${idx}`} className="h-8 flex items-center justify-center" />;
                 const hasEvent = calendarEvents[dayNum];
 
                 return (
@@ -525,7 +526,7 @@ export default function DashboardView({
             {selectedCalendarDay && calendarEvents[selectedCalendarDay] ? (
               <div className="mt-3 p-2.5 bg-slate-950/60 rounded-2xl text-left text-[11px] leading-tight text-slate-300 border border-slate-800 antialiased animate-fade-in">
                 <p className="font-bold text-white">
-                  Día {selectedCalendarDay} de Octubre:
+                  Día {selectedCalendarDay} de {MONTH_NAMES_SPANISH[calMonth]}:
                 </p>
                 <div className="mt-1 text-slate-400">
                   Novedad: <span className="font-semibold text-white">{calendarEvents[selectedCalendarDay].type}</span>

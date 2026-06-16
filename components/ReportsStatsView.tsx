@@ -21,7 +21,7 @@ const monthlyAbsenceStats: MonthlyAbsenceStat[] = [
 ];
 
 export default function ReportsStatsView() {
-  const [activeReportYear, setActiveReportYear] = useState("2025");
+  const [activeReportYear, setActiveReportYear] = useState(String(new Date().getFullYear()));
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
 
   const kpis = [
@@ -61,7 +61,7 @@ export default function ReportsStatsView() {
         </div>
 
         <div className="flex gap-2">
-          {["2024", "2025", "2026"].map((y) => (
+          {[String(new Date().getFullYear() - 1), String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map((y) => (
             <button
               key={y}
               onClick={() => setActiveReportYear(y)}

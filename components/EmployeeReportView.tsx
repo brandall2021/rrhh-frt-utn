@@ -27,7 +27,7 @@ export default function EmployeeReportView({
   absences,
   setAbsences,
 }: EmployeeReportViewProps) {
-  const [currentYear, setCurrentYear] = useState<number>(2025);
+  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [selectedMonthTab, setSelectedMonthTab] = useState<string>("Todos");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDayModal, setShowDayModal] = useState(false);
