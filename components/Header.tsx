@@ -123,10 +123,10 @@ export default function Header({
         <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 font-mono border-r pr-3 border-slate-800 select-none">
           <Clock className="w-3 h-3 shrink-0" />
           <span suppressHydrationWarning>
-            {now.toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" })}
+            {now.toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short", timeZone: "America/Argentina/Buenos_Aires" })}
           </span>
           <span className="text-slate-500 font-semibold" suppressHydrationWarning>
-            {now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+            {now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Argentina/Buenos_Aires" })}
           </span>
         </div>
 
