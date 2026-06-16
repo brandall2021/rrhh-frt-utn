@@ -1,5 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { logAudit, getClientIp, diffAbsences } from "@/lib/audit";
 import fs from "fs";
 import path from "path";
 
@@ -45,9 +47,36 @@ export async function PUT(
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const all = readAbsences();
-  all[params.id] = body.absences ?? [];
-  writeAbsences(all);
+  const oldAbsences = readAbsences();
+  const oldList = oldAbsences[params.id] || [];
+  const newList = body.absences ?? [];
 
-  return Response.json({ data: all[params.id] });
+  const ip = getClientIp(request);
+  const adminEmail = session.user?.email ?? "desconocido";
+  const adminName = (session.user as any)?.name ?? undefined;
+
+  // Get employee name
+  const employee = await prisma.employee.findUnique({
+    where: { id: params.id },
+    select: { firstName: true, lastName: true },
+  });
+  const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : params.id;
+
+  // Diff and log
+  const { added, removed } = diffAbsences(oldList, newList, params.id, employeeName);
+
+  for (const entry of [...added, ...removed]) {
+    await logAudit({
+      ...entry,
+      performedBy: adminEmail,
+      adminName,
+      ipAddress: ip,
+    });
+  }
+
+  // Save
+  oldAbsences[params.id] = newList;
+  writeAbsences(oldAbsences);
+
+  return Response.json({ data: newList });
 }

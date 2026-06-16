@@ -25,6 +25,20 @@ model EmailTemplate {
   updatedAt DateTime @updatedAt
 }
 
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String   // CREATE | DELETE
+  entityType  String   // AUSENCIA | LICENCIA
+  entityId    String?
+  employeeId  String?
+  employeeName String?
+  description String
+  performedBy String   // email del admin
+  adminName   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+}
+
 model Department {
   id        String     @id @default(cuid())
   name      String     @unique

@@ -1,0 +1,16 @@
+-- Create AuditLog table
+CREATE TABLE "AuditLog" (
+    "id" TEXT NOT NULL,
+    "action" TEXT NOT NULL,
+    "entityType" TEXT NOT NULL,
+    "entityId" TEXT,
+    "employeeId" TEXT,
+    "employeeName" TEXT,
+    "description" TEXT NOT NULL,
+    "performedBy" TEXT NOT NULL,
+    "adminName" TEXT,
+    "ipAddress" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
+);

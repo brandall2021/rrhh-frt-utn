@@ -17,6 +17,7 @@ const PATH_TO_VIEW: Record<string, string> = {
   "/settings": "settings",
   "/configuracion/plantillas": "plantillas",
   "/configuracion/plantillas/nueva": "plantillas-nueva",
+  "/auditoria": "auditoria",
 };
 
 const VIEW_TO_PATH: Record<string, string> = {
@@ -31,6 +32,7 @@ const VIEW_TO_PATH: Record<string, string> = {
   settings: "/settings",
   plantillas: "/configuracion/plantillas",
   "plantillas-nueva": "/configuracion/plantillas/nueva",
+  auditoria: "/auditoria",
 };
 
 export default function DashboardLayout({
@@ -42,7 +44,11 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const currentView = PATH_TO_VIEW[pathname] ?? (pathname.startsWith("/configuracion/plantillas/") ? "plantillas" : "dashboard");
+  const currentView = PATH_TO_VIEW[pathname] ?? (
+    pathname.startsWith("/configuracion/plantillas/") ? "plantillas"
+    : pathname === "/auditoria" ? "auditoria"
+    : "dashboard"
+  );
 
   const handleViewChange = (view: string) => {
     router.push(VIEW_TO_PATH[view] ?? "/");
