@@ -11,6 +11,7 @@ import {
   Trash2,
   X,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import { Employee, AbsenceType, Absence, LeaveRequest, NovedadType } from "@/types";
 import {
@@ -41,18 +42,18 @@ export default function ReportsCalendarView() {
     fetch("/api/absence-types").then(r => r.json()).then(({ data }) => setAbsenceTypes(data ?? [])).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (!selectedEmployeeId) {
+  const fetchAbsencesAndRequests = React.useCallback((empId: string) => {
+    if (!empId) {
       setAbsences([]);
       setLeaveRequests([]);
       return;
     }
-    fetch(`/api/employees/${selectedEmployeeId}/absences`)
+    fetch(`/api/employees/${empId}/absences`)
       .then(r => r.json())
       .then(({ data }) => setAbsences(data ?? []))
       .catch(() => setAbsences([]));
 
-    fetch(`/api/requests?employeeId=${selectedEmployeeId}`)
+    fetch(`/api/requests?employeeId=${empId}`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -67,7 +68,21 @@ export default function ReportsCalendarView() {
         console.error("Error fetching leave requests:", err);
         setLeaveRequests([]);
       });
-  }, [selectedEmployeeId]);
+  }, []);
+
+  useEffect(() => {
+    fetchAbsencesAndRequests(selectedEmployeeId);
+  }, [selectedEmployeeId, fetchAbsencesAndRequests]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && selectedEmployeeId) {
+        fetchAbsencesAndRequests(selectedEmployeeId);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [selectedEmployeeId, fetchAbsencesAndRequests]);
 
   const selectedEmployee = employees.find(e => e.id === selectedEmployeeId) ?? null;
 
@@ -266,6 +281,13 @@ export default function ReportsCalendarView() {
                 >
                   <Download size={12} />
                   PDF
+                </button>
+                <button
+                  onClick={() => fetchAbsencesAndRequests(selectedEmployeeId)}
+                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-slate-700"
+                >
+                  <RefreshCw size={12} />
+                  Refrescar
                 </button>
               </div>
             )}
