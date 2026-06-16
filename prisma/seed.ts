@@ -20,11 +20,20 @@ function parseSpanishDate(dateStr: string): Date {
 async function main() {
   console.log("Seeding...");
 
-  await prisma.adminUser.upsert({
-    where: { email: "admin@precisionhr.com" },
-    update: {},
-    create: { email: "admin@precisionhr.com", name: "Admin" },
-  });
+  const admins = [
+    { email: "admin@precisionhr.com", name: "Admin" },
+    { email: "personal@face.unt.edu.ar", name: "Personal" },
+    { email: process.env.ADMIN_EMAIL || "", name: "Admin Principal" },
+  ];
+
+  for (const a of admins) {
+    if (!a.email) continue;
+    await prisma.adminUser.upsert({
+      where: { email: a.email },
+      update: {},
+      create: a,
+    });
+  }
 
   // Upsert departments
   const departmentNames = ["IT & Desarrollo", "Operaciones", "Marketing", "IT Ops", "Ventas"];
