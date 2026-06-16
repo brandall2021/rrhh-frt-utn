@@ -1,50 +1,36 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { readFile, writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import type { AbsenceType } from "@/types";
-import { absenceTypeArraySchema } from "@/lib/validation";
+import { prisma } from "@/lib/db";
 
-const DATA_DIR = join(process.cwd(), "data");
-const DATA_FILE = join(DATA_DIR, "absence-types.json");
-
-const DEFAULT_TYPES: AbsenceType[] = [
-  { id: "enfermedad", name: "Enfermedad", code: "ENF", color: "red" },
-  { id: "particular", name: "Particular", code: "PAR", color: "amber" },
-  { id: "estudio", name: "Estudio", code: "EST", color: "blue" },
-  { id: "compensatorio", name: "Compensatorio", code: "COM", color: "emerald" },
-  { id: "medica", name: "Licencia Médica", code: "MED", color: "orange" },
-  { id: "maternidad", name: "Maternidad", code: "MAT", color: "purple" },
-  { id: "ausencia", name: "Ausencia", code: "AUS", color: "slate" },
+const DEFAULT_TYPES = [
+  { name: "Enfermedad", code: "ENF", color: "red" },
+  { name: "Particular", code: "PAR", color: "amber" },
+  { name: "Estudio", code: "EST", color: "blue" },
+  { name: "Compensatorio", code: "COM", color: "emerald" },
+  { name: "Licencia Médica", code: "MED", color: "orange" },
+  { name: "Maternidad", code: "MAT", color: "purple" },
+  { name: "Ausencia", code: "AUS", color: "slate" },
 ];
 
-let cached: AbsenceType[] | null = null;
+async function ensureDefaultTypes(): Promise<void> {
+  const count = await prisma.absenceType.count();
+  if (count > 0) return;
 
-async function load(): Promise<AbsenceType[]> {
-  if (cached) return cached;
-  try {
-    const raw = await readFile(DATA_FILE, "utf-8");
-    cached = JSON.parse(raw);
-    return cached!;
-  } catch {
-    await mkdir(DATA_DIR, { recursive: true });
-    await writeFile(DATA_FILE, JSON.stringify(DEFAULT_TYPES, null, 2));
-    cached = DEFAULT_TYPES;
-    return cached;
-  }
-}
-
-async function save(types: AbsenceType[]): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(DATA_FILE, JSON.stringify(types, null, 2));
-  cached = types;
+  await prisma.absenceType.createMany({
+    data: DEFAULT_TYPES.map((t) => ({
+      name: t.name,
+      code: t.code,
+      color: t.color,
+    })),
+  });
 }
 
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const types = await load();
+  await ensureDefaultTypes();
+  const types = await prisma.absenceType.findMany({ orderBy: { name: "asc" } });
   return Response.json({ data: types });
 }
 
@@ -54,12 +40,13 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const parsed = absenceTypeArraySchema.safeParse(body.types);
-    if (!parsed.success) {
-      return Response.json({ error: "Datos de tipos de ausencia inválidos" }, { status: 400 });
-    }
-    await save(parsed.data);
-    return Response.json({ data: parsed.data });
+    const types = body.types as { name: string; code: string; color: string }[];
+
+    await prisma.absenceType.deleteMany();
+    await prisma.absenceType.createMany({ data: types });
+
+    const saved = await prisma.absenceType.findMany({ orderBy: { name: "asc" } });
+    return Response.json({ data: saved });
   } catch {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }

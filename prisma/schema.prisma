@@ -67,6 +67,7 @@ model Employee {
   emergencyContact Json
   leaveRequests    LeaveRequest[]
   documents        Document[]
+  absences         Absence[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
@@ -98,6 +99,24 @@ model Document {
   rejectReason String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+}
+
+model AbsenceType {
+  id        String    @id @default(cuid())
+  name      String
+  code      String
+  color     String
+  absences  Absence[]
+}
+
+model Absence {
+  id            String      @id @default(cuid())
+  employeeId    String
+  absenceTypeId String
+  date          DateTime
+  notes         String?
+  absenceType   AbsenceType @relation(fields: [absenceTypeId], references: [id])
+  employee      Employee    @relation(fields: [employeeId], references: [id])
 }
 
 enum EmployeeStatus {

@@ -95,7 +95,7 @@ export async function createEmployee(data: Record<string, unknown>) {
   const parsed = employeeCreateSchema.parse(data);
   return prisma.employee.create({
     data: {
-      id: `EMP-${Date.now()}`,
+      id: `EMP-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
       firstName: parsed.firstName,
       lastName: parsed.lastName,
       email: parsed.email,

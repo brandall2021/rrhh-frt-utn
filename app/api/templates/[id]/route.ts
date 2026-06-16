@@ -30,7 +30,10 @@ export async function PUT(
     return Response.json({ error: "subject y body son requeridos" }, { status: 400 });
   }
 
-  const updated = await saveTemplate({ subject, body: htmlBody, name: "" }, params.id);
+  const existing = await getTemplate(params.id);
+  if (!existing) return Response.json({ error: "Not found" }, { status: 404 });
+
+  const updated = await saveTemplate({ name: existing.name, subject, body: htmlBody }, params.id);
   return Response.json({ data: updated });
 }
 

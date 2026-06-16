@@ -1,24 +1,4 @@
 import { prisma } from "./db";
-import fs from "fs";
-import path from "path";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const ABSENCES_FILE = path.join(DATA_DIR, "absences.json");
-
-interface AbsenceRecord {
-  id: string;
-  employeeId: string;
-  absenceTypeId: string;
-  date: string;
-  notes?: string;
-}
-
-interface AbsenceTypeInfo {
-  id: string;
-  name: string;
-  code: string;
-  color: string;
-}
 
 export interface DailyReportEntry {
   id: string;
@@ -40,15 +20,6 @@ export interface DailyReport {
   entries: DailyReportEntry[];
 }
 
-function readAbsences(): Record<string, AbsenceRecord[]> {
-  try {
-    if (fs.existsSync(ABSENCES_FILE)) {
-      return JSON.parse(fs.readFileSync(ABSENCES_FILE, "utf-8"));
-    }
-  } catch {}
-  return {};
-}
-
 export async function getDailyReport(dateStr: string): Promise<DailyReport> {
   const date = new Date(dateStr + "T00:00:00.000Z");
 
@@ -66,20 +37,22 @@ export async function getDailyReport(dateStr: string): Promise<DailyReport> {
         },
       },
     }),
-    prisma.$queryRawUnsafe<AbsenceTypeInfo[]>(
-      `SELECT id, name, code, color FROM "AbsenceType"`
-    ).catch(() => [] as AbsenceTypeInfo[]),
+    prisma.absenceType.findMany({
+      select: { id: true, name: true, code: true, color: true },
+    }),
   ]);
 
   const typeColors = absenceTypes.length > 0
     ? Object.fromEntries(absenceTypes.map((t) => [t.id, { name: t.name, code: t.code, color: t.color }]))
     : {};
 
-  const allAbsences = readAbsences();
+  const allAbsences = await prisma.absence.findMany({
+    where: { date: { gte: new Date(dateStr + "T00:00:00.000Z"), lte: new Date(dateStr + "T23:59:59.999Z") } },
+  });
   const entries: DailyReportEntry[] = [];
 
   employees.forEach((emp) => {
-    const empAbsences = (allAbsences[emp.id] || []).filter((a) => a.date === dateStr);
+    const empAbsences = allAbsences.filter((a) => a.employeeId === emp.id);
     const empLeaves = emp.leaveRequests;
 
     empLeaves.forEach((leave) => {
@@ -106,7 +79,7 @@ export async function getDailyReport(dateStr: string): Promise<DailyReport> {
         type: tc?.name ?? "Ausencia",
         typeCode: tc?.code ?? "AUS",
         typeColor: tc?.color ?? "red",
-        notes: abs.notes,
+        notes: abs.notes ?? undefined,
         source: "inasistencia",
       });
     });

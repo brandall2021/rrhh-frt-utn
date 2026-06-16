@@ -31,7 +31,7 @@ export async function POST(
 
   const ext = extname(file.name) || ".jpg";
   const fileName = `${params.id}${ext}`;
-  const uploadDir = join(process.cwd(), "public", "photos");
+  const uploadDir = join(process.cwd(), "uploads", "photos");
   const filePath = join(uploadDir, fileName);
 
   await mkdir(uploadDir, { recursive: true });
@@ -39,7 +39,7 @@ export async function POST(
   const bytes = await file.arrayBuffer();
   await writeFile(filePath, Buffer.from(bytes));
 
-  return Response.json({ data: { photoUrl: `/photos/${fileName}` } });
+  return Response.json({ data: { photoUrl: `/api/photos/${fileName}` } });
 }
 
 export async function DELETE(
@@ -52,7 +52,7 @@ export async function DELETE(
   const { unlink } = await import("fs/promises");
   const { readdir } = await import("fs/promises");
 
-  const uploadDir = join(process.cwd(), "public", "photos");
+  const uploadDir = join(process.cwd(), "uploads", "photos");
   try {
     const files = await readdir(uploadDir);
     for (const f of files) {

@@ -170,6 +170,22 @@ async function main() {
     },
   });
 
+  // Seed absence types
+  const existingTypes = await prisma.absenceType.count();
+  if (existingTypes === 0) {
+    await prisma.absenceType.createMany({
+      data: [
+        { name: "Enfermedad", code: "ENF", color: "red" },
+        { name: "Particular", code: "PAR", color: "amber" },
+        { name: "Estudio", code: "EST", color: "blue" },
+        { name: "Compensatorio", code: "COM", color: "emerald" },
+        { name: "Licencia Médica", code: "MED", color: "orange" },
+        { name: "Maternidad", code: "MAT", color: "purple" },
+        { name: "Ausencia", code: "AUS", color: "slate" },
+      ],
+    });
+  }
+
   // Seed birthday email template
   await prisma.emailTemplate.upsert({
     where: { name: "birthday" },
