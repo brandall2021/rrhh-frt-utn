@@ -15,6 +15,8 @@ const PATH_TO_VIEW: Record<string, string> = {
   "/reports/calendario": "reports-calendario",
   "/birthdays": "birthdays",
   "/settings": "settings",
+  "/configuracion/plantillas": "plantillas",
+  "/configuracion/plantillas/nueva": "plantillas-nueva",
 };
 
 const VIEW_TO_PATH: Record<string, string> = {
@@ -27,6 +29,8 @@ const VIEW_TO_PATH: Record<string, string> = {
   "reports-calendario": "/reports/calendario",
   birthdays: "/birthdays",
   settings: "/settings",
+  plantillas: "/configuracion/plantillas",
+  "plantillas-nueva": "/configuracion/plantillas/nueva",
 };
 
 export default function DashboardLayout({
@@ -38,7 +42,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const currentView = PATH_TO_VIEW[pathname] ?? "dashboard";
+  const currentView = PATH_TO_VIEW[pathname] ?? (pathname.startsWith("/configuracion/plantillas/") ? "plantillas" : "dashboard");
 
   const handleViewChange = (view: string) => {
     router.push(VIEW_TO_PATH[view] ?? "/");

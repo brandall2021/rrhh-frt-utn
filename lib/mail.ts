@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { getTemplateByName, renderTemplate } from "./templates";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -103,26 +104,55 @@ export async function sendDailyReportEmail(
   }
 }
 
+const FALLBACK_SUBJECT = "Feliz Cumpleaños";
+const FALLBACK_BODY = `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h1 style="color: #D60000;">Feliz Cumplea&ntilde;os, {{employeeName}}!</h1>
+    <p>Queremos desearte un muy feliz d&iacute;a lleno de alegr&iacute;a y &eacute;xito.</p>
+    <p>Que este nuevo a&ntilde;o de vida est&eacute; lleno de grandes logros y momentos inolvidables.</p>
+    <br>
+    <p style="color: #666;">Atentamente,</p>
+    <p style="color: #D60000; font-weight: bold;">FACE UNT - Recursos Humanos</p>
+  </div>
+`;
+
 export async function sendBirthdayEmail(
   to: string,
-  employeeName: string
+  employeeName: string,
+  extraVars?: Record<string, string>
 ): Promise<boolean> {
   try {
+    const template = await getTemplateByName("birthday");
     const safeName = escapeHtml(employeeName);
+
+    const vars: Record<string, string> = {
+      employeeName: safeName,
+      firstName: safeName.split(" ")[0],
+      birthDate: "",
+      age: "",
+      department: "",
+      currentYear: String(new Date().getFullYear()),
+      companyName: "FACE UNT",
+      ...extraVars,
+    };
+
+    let subject = FALLBACK_SUBJECT;
+    let body = FALLBACK_BODY;
+
+    if (template) {
+      const rendered = renderTemplate(template, vars);
+      subject = rendered.subject;
+      body = rendered.body;
+    } else {
+      subject = subject.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
+      body = body.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
+    }
+
     await transporter.sendMail({
       from: process.env.MAIL_FROM || process.env.SMTP_USER,
       to,
-      subject: "Feliz Cumpleaños",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #D60000;">Feliz Cumplea&ntilde;os, ${safeName}!</h1>
-          <p>Queremos desearte un muy feliz d&iacute;a lleno de alegr&iacute;a y &eacute;xito.</p>
-          <p>Que este nuevo a&ntilde;o de vida est&eacute; lleno de grandes logros y momentos inolvidables.</p>
-          <br>
-          <p style="color: #666;">Atentamente,</p>
-          <p style="color: #D60000; font-weight: bold;">FACE UNT - Recursos Humanos</p>
-        </div>
-      `,
+      subject,
+      html: body,
     });
     return true;
   } catch {

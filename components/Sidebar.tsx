@@ -15,6 +15,7 @@ import {
   BarChart3,
   Calendar,
   Clock,
+  Mail,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -181,6 +182,18 @@ export default function Sidebar({
         >
           <Settings className="w-4 h-4" />
           <span>Configuración</span>
+        </button>
+
+        <button
+          onClick={() => onViewChange("plantillas")}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border ${
+            currentView === "plantillas"
+              ? "bg-brand text-white border-brand/30 font-bold shadow-[0_0_10px_rgba(214, 0, 0,0.2)]"
+              : "text-slate-400 border-transparent hover:bg-slate-900/50 hover:text-white"
+          }`}
+        >
+          <Mail className="w-4 h-4" />
+          <span>Plantillas de Email</span>
         </button>
       </nav>
 

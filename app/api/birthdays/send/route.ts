@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   try {
     const employee = await prisma.employee.findUnique({
       where: { id: parsed.data.employeeId },
-      select: { firstName: true, lastName: true, email: true },
+      select: { firstName: true, lastName: true, email: true, birthDate: true, department: { select: { name: true } } },
     });
 
     if (!employee) {
@@ -31,7 +31,14 @@ export async function POST(request: Request) {
     }
 
     const fullName = `${employee.firstName} ${employee.lastName}`;
-    const sent = await sendBirthdayEmail(employee.email, fullName);
+    const birthDateStr = employee.birthDate.toLocaleDateString("es-AR", { day: "numeric", month: "long" });
+    const age = new Date().getFullYear() - employee.birthDate.getFullYear();
+
+    const sent = await sendBirthdayEmail(employee.email, fullName, {
+      birthDate: birthDateStr,
+      age: String(age),
+      department: employee.department.name,
+    });
 
     if (!sent) {
       return Response.json({ error: "Error al enviar email" }, { status: 500 });

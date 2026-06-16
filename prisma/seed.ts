@@ -170,6 +170,24 @@ async function main() {
     },
   });
 
+  // Seed birthday email template
+  await prisma.emailTemplate.upsert({
+    where: { name: "birthday" },
+    update: {},
+    create: {
+      name: "birthday",
+      subject: "Feliz Cumpleaños, {{employeeName}}!",
+      body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h1 style="color: #D60000;">Feliz Cumplea&ntilde;os, {{employeeName}}!</h1>
+  <p>Queremos desearte un muy feliz d&iacute;a lleno de alegr&iacute;a y &eacute;xito.</p>
+  <p>Que este nuevo a&ntilde;o de vida est&eacute; lleno de grandes logros y momentos inolvidables.</p>
+  <br>
+  <p style="color: #666;">Atentamente,</p>
+  <p style="color: #D60000; font-weight: bold;">FACE UNT - Recursos Humanos</p>
+</div>`,
+    },
+  });
+
   console.log("Seed completado.");
 }
 
