@@ -408,9 +408,80 @@ export default function ReportsCalendarView() {
               })}
             </div>
 
+            {/* Tabla de inasistencias */}
+            {combinedDayMap.size > 0 && (
+              <div className="mt-6 pt-4 border-t border-slate-800">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-light mb-3">
+                  Detalle de inasistencias — {calendarYear}
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[10px]">
+                    <thead>
+                      <tr className="text-slate-500 uppercase tracking-wider border-b border-slate-800">
+                        <th className="text-left py-2 pr-3 font-semibold">Fecha</th>
+                        <th className="text-left py-2 pr-3 font-semibold">Tipo</th>
+                        <th className="text-left py-2 pr-3 font-semibold">Estado</th>
+                        <th className="text-left py-2 pr-3 font-semibold">Origen</th>
+                        <th className="text-left py-2 font-semibold">Observaciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.from(combinedDayMap.entries())
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([dateStr, info]) => {
+                          const d = new Date(dateStr + "T12:00:00");
+                          const fecha = `${d.getDate()} ${MONTH_SHORT_NAMES_SPANISH[d.getMonth()]} ${d.getFullYear()}`;
+                          let tipo = "";
+                          let estado = "";
+                          let origen = "";
+                          let obs = "";
+
+                          if (info.absence) {
+                            const at = absenceTypes.find(t => t.id === info.absence!.absenceTypeId);
+                            tipo = at?.name ?? info.absence.absenceTypeId;
+                            estado = "Registrado";
+                            origen = "Manual";
+                            obs = info.absence.notes ?? "";
+                          } else if (info.leaveRequest) {
+                            const lr = info.leaveRequest;
+                            tipo = lr.type;
+                            const st = lr.state === "PENDIENTE" ? "Pendiente" : lr.state === "APROBADO" ? "Aprobado" : lr.state === "PROCESADO" ? "Procesado" : lr.state;
+                            estado = st;
+                            origen = "Solicitud";
+                            obs = lr.observations ?? "";
+                          }
+
+                          const novColor = info.leaveRequest
+                            ? (NOVEDAD_COLOR_MAP[info.leaveRequest.type] || "slate")
+                            : info.absence && absenceTypes.find(t => t.id === info.absence!.absenceTypeId)
+                              ? (absenceTypes.find(t => t.id === info.absence!.absenceTypeId)!.color)
+                              : "slate";
+                          const cfg = COLOR_CONFIGS[novColor as keyof typeof COLOR_CONFIGS] || COLOR_CONFIGS.red;
+
+                          return (
+                            <tr key={dateStr} className="border-b border-slate-800/50 hover:bg-slate-950/30 transition-colors">
+                              <td className="py-2 pr-3 text-slate-200 font-medium whitespace-nowrap">{fecha}</td>
+                              <td className="py-2 pr-3">
+                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold ${cfg.badgeColor}`}>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
+                                  {tipo}
+                                </span>
+                              </td>
+                              <td className="py-2 pr-3 text-slate-400">{estado}</td>
+                              <td className="py-2 pr-3 text-slate-400">{origen}</td>
+                              <td className="py-2 text-slate-500 max-w-[200px] truncate" title={obs}>{obs || "—"}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-500">
               <span>{selectedEmployee.lastName}, {selectedEmployee.firstName} — {selectedEmployee.department}</span>
-              <span>Generado: {new Date().toLocaleDateString("es-AR")}</span>
+              <span>{combinedDayMap.size} inasistencias registradas</span>
             </div>
           </div>
         )}
