@@ -33,8 +33,9 @@ export default function NewRequestView({
   // Form states
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(employees[0]?.id || "");
   const [selectedType, setSelectedType] = useState<NovedadType>(NovedadType.PARTICULAR);
-  const [startDate, setStartDate] = useState("2025-10-20");
-  const [endDate, setEndDate] = useState("2025-10-22");
+  const today = new Date().toISOString().slice(0, 10);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [observations, setObservations] = useState("");
 
   // Confirmation modal
@@ -96,7 +97,7 @@ export default function NewRequestView({
       state: RequestState.PENDIENTE,
       observations,
       attachedFile: uploadedFileName || undefined,
-      submissionDate: "2025-10-10",
+      submissionDate: today,
     };
 
     setPendingRequest(requestRecord);
