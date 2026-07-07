@@ -151,7 +151,7 @@ export default function TemplateEditor({
             </div>
             {preview ? (
               <div
-                className="bg-white rounded-lg p-6 min-h-[300px] border border-slate-700"
+                className="bg-[#fff] rounded-lg p-6 min-h-[300px] border border-slate-700"
                 dangerouslySetInnerHTML={{ __html: body }}
               />
             ) : (

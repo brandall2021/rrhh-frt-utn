@@ -9,23 +9,23 @@
   --color-brand-lighter: #FF4444;
   --color-brand-muted: rgba(214, 0, 0, 0.1);
 
-  --color-white: #fff;
+  --color-white: var(--c-white);
   --color-black: #000;
   --color-transparent: transparent;
   --color-current: currentColor;
   --color-inherit: inherit;
 
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  --color-slate-950: #020617;
+  --color-slate-50: var(--c-slate-50);
+  --color-slate-100: var(--c-slate-100);
+  --color-slate-200: var(--c-slate-200);
+  --color-slate-300: var(--c-slate-300);
+  --color-slate-400: var(--c-slate-400);
+  --color-slate-500: var(--c-slate-500);
+  --color-slate-600: var(--c-slate-600);
+  --color-slate-700: var(--c-slate-700);
+  --color-slate-800: var(--c-slate-800);
+  --color-slate-900: var(--c-slate-900);
+  --color-slate-950: var(--c-slate-950);
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
   --color-gray-200: #e5e7eb;
@@ -161,6 +161,19 @@
 }
 
 :root {
+  --c-white: #ffffff;
+  --c-slate-50: #f8fafc;
+  --c-slate-100: #f1f5f9;
+  --c-slate-200: #e2e8f0;
+  --c-slate-300: #cbd5e1;
+  --c-slate-400: #94a3b8;
+  --c-slate-500: #64748b;
+  --c-slate-600: #475569;
+  --c-slate-700: #334155;
+  --c-slate-800: #1e293b;
+  --c-slate-900: #0f172a;
+  --c-slate-950: #020617;
+
   --bg-primary: #020617;
   --bg-secondary: #0f172a;
   --bg-card: rgba(15, 23, 42, 0.5);
@@ -179,6 +192,19 @@
 }
 
 .light {
+  --c-white: #1e293b;
+  --c-slate-50: #020617;
+  --c-slate-100: #0f172a;
+  --c-slate-200: #1e293b;
+  --c-slate-300: #334155;
+  --c-slate-400: #475569;
+  --c-slate-500: #64748b;
+  --c-slate-600: #94a3b8;
+  --c-slate-700: #cbd5e1;
+  --c-slate-800: #e2e8f0;
+  --c-slate-900: #f1f5f9;
+  --c-slate-950: #f8fafc;
+
   --bg-primary: #f1f5f9;
   --bg-secondary: #ffffff;
   --bg-card: rgba(255, 255, 255, 0.85);
@@ -199,6 +225,11 @@
 .light .logo-white { display: none; }
 .light .logo-dark { display: block; }
 .logo-dark { display: none; }
+
+.light .bg-brand,
+.light .bg-emerald-600 {
+  --c-white: #ffffff;
+}
 
 ::-webkit-scrollbar {
   width: 6px;

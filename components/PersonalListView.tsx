@@ -172,7 +172,7 @@ export default function PersonalListView({
                 setSelectedDept(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-brand outline-none cursor-pointer"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-brand outline-none cursor-pointer"
             >
               {departments.map((dept, i) => (
                 <option key={i} value={dept} className="bg-slate-950 text-white">
@@ -190,7 +190,7 @@ export default function PersonalListView({
                 setSelectedStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-brand outline-none cursor-pointer"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-brand outline-none cursor-pointer"
             >
               <option value="Todos" className="bg-slate-950 text-white">Todos los Estados</option>
               <option value="Activo" className="bg-slate-950 text-white">Activo</option>
@@ -286,7 +286,7 @@ export default function PersonalListView({
                 </div>
 
                 {/* Footer Buttons with click triggers */}
-                <div className="flex gap-2 pt-2 border-t border-slate-850/60">
+                <div className="flex gap-2 pt-2 border-t border-slate-800/60">
                   <button
                     onClick={() => onEmployeeClick(emp.id)}
                     className="flex-1 bg-brand/10 hover:bg-brand hover:text-white text-brand-light border border-brand/20 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center"

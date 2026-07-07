@@ -244,7 +244,7 @@ export default function EmployeeProfileView({
         <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
           <div className="flex gap-4 items-center">
             <div className="relative group">
-              <div className="w-16 h-16 bg-slate-800 text-slate-200 border border-slate-705 rounded-2xl flex items-center justify-center font-bold text-lg select-none overflow-hidden">
+              <div className="w-16 h-16 bg-slate-800 text-slate-200 border border-slate-700 rounded-2xl flex items-center justify-center font-bold text-lg select-none overflow-hidden">
                 {photoUrl ? (
                   <img src={photoUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -345,16 +345,16 @@ export default function EmployeeProfileView({
         </div>
 
         {/* Statistical progress row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-5 border-t border-slate-850 select-none text-left">
-          <div className="border-r border-slate-850 pr-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-5 border-t border-slate-800 select-none text-left">
+          <div className="border-r border-slate-800 pr-2">
             <p className="text-[10px] uppercase font-bold text-slate-400">Total de Archivos</p>
             <p className="text-xl font-extrabold text-slate-200 mt-0.5 mt-1">{totalFiles}</p>
           </div>
-          <div className="border-r border-slate-850 pr-2">
+          <div className="border-r border-slate-800 pr-2">
             <p className="text-[10px] uppercase font-bold text-emerald-400">Documentos Vigentes</p>
             <p className="text-xl font-extrabold text-emerald-400 mt-0.5 mt-1">{vigentes}</p>
           </div>
-          <div className="border-r border-slate-850 pr-2">
+          <div className="border-r border-slate-800 pr-2">
             <p className="text-[10px] uppercase font-bold text-amber-400">Por Vencer / Vencidos</p>
             <p className="text-xl font-extrabold text-amber-400 mt-0.5 mt-1">{expiradosorVencer}</p>
           </div>
@@ -465,9 +465,9 @@ export default function EmployeeProfileView({
                           <th className="px-4 py-2.5 text-right">Acción</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-850">
+                      <tbody className="divide-y divide-slate-800">
                         {documents.map((doc) => (
-                          <tr key={doc.id} className="hover:bg-slate-850/40 transition-colors text-xs text-left text-slate-200">
+                          <tr key={doc.id} className="hover:bg-slate-800/40 transition-colors text-xs text-left text-slate-200">
                             <td className="px-4 py-3.5">
                               <div className="flex items-center gap-2.5 text-left">
                                 <FileText className="w-4 h-4 text-slate-500 shrink-0" />
@@ -759,7 +759,7 @@ export default function EmployeeProfileView({
                     <th className="px-4 py-2.5 text-right">Estado</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-850">
+                <tbody className="divide-y divide-slate-800">
                   {employeeLeaves.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-550 italic">
@@ -768,7 +768,7 @@ export default function EmployeeProfileView({
                     </tr>
                   ) : (
                     employeeLeaves.map((leave) => (
-                      <tr key={leave.id} className="hover:bg-slate-850/30 transition-colors text-xs text-left">
+                      <tr key={leave.id} className="hover:bg-slate-800/30 transition-colors text-xs text-left">
                         <td className="px-4 py-3 align-middle font-semibold text-slate-200">
                           <span
                             className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase shrink-0 ${getNovedadBadgeStyles(

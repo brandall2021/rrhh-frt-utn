@@ -373,7 +373,7 @@ export default function SettingsView({
                         type="button"
                         onClick={() => setTypeForm((p) => ({ ...p, color: c.value }))}
                         className={`w-7 h-7 rounded-full ${c.bg} ${
-                          typeForm.color === c.value ? "ring-2 ring-white ring-offset-1 ring-offset-slate-900" : "opacity-70 hover:opacity-100"
+                          typeForm.color === c.value ? "ring-2 ring-[#fff] ring-offset-1 ring-offset-slate-900" : "opacity-70 hover:opacity-100"
                         } transition-all cursor-pointer`}
                         title={c.label}
                       />

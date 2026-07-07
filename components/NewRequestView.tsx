@@ -194,7 +194,7 @@ export default function NewRequestView({
                     className={`p-3.5 border rounded-2xl text-left cursor-pointer transition-all ${
                       selectedType === opt.type
                        ? "border-brand bg-brand/5 ring-1 ring-brand"
-                       : "border-slate-800 bg-slate-950 hover:border-slate-705 hover:bg-slate-900/40"
+                       : "border-slate-800 bg-slate-950 hover:border-slate-700 hover:bg-slate-900/40"
                     }`}
                   >
                     <div className="flex justify-between items-center">

@@ -38,7 +38,7 @@ export default function ReportsCalendarView() {
   } | null>(null);
 
   useEffect(() => {
-    fetch("/api/employees").then(r => r.json()).then(({ data }) => setEmployees(data ?? [])).catch(() => {});
+    fetch("/api/employees").then(r => r.json()).then(({ items }) => setEmployees(items ?? [])).catch(() => {});
     fetch("/api/absence-types").then(r => r.json()).then(({ data }) => setAbsenceTypes(data ?? [])).catch(() => {});
   }, []);
 

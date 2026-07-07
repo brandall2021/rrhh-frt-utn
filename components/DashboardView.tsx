@@ -291,7 +291,7 @@ export default function DashboardView({
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => onEmployeeClick(req.employeeId)}
-                              className="w-9 h-9 bg-slate-800 text-slate-200 border border-slate-705 flex items-center justify-center rounded-xl font-bold text-xs shrink-0 cursor-pointer hover:bg-brand hover:text-white transition-all hover:border-transparent"
+                              className="w-9 h-9 bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center rounded-xl font-bold text-xs shrink-0 cursor-pointer hover:bg-brand hover:text-white transition-all hover:border-transparent"
                             >
                               {req.employeeName
                                 .split(" ")
