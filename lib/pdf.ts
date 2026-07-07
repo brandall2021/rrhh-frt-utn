@@ -1,4 +1,29 @@
 const COLOR_OVERRIDES = `
+  --c-white: #ffffff !important;
+  --c-slate-50: #f8fafc !important;
+  --c-slate-100: #f1f5f9 !important;
+  --c-slate-200: #e2e8f0 !important;
+  --c-slate-300: #cbd5e1 !important;
+  --c-slate-400: #94a3b8 !important;
+  --c-slate-500: #64748b !important;
+  --c-slate-600: #475569 !important;
+  --c-slate-700: #334155 !important;
+  --c-slate-800: #1e293b !important;
+  --c-slate-900: #0f172a !important;
+  --c-slate-950: #020617 !important;
+
+  --bg-primary: #020617 !important;
+  --bg-secondary: #0f172a !important;
+  --bg-card: rgba(15, 23, 42, 0.5) !important;
+  --bg-surface: #020617 !important;
+  --bg-elevated: #0f172a !important;
+  --text-primary: #f8fafc !important;
+  --text-secondary: #e2e8f0 !important;
+  --text-muted: #94a3b8 !important;
+  --border: #1e293b !important;
+  --scrollbar-track: #020617 !important;
+  --scrollbar-thumb: #334155 !important;
+
   --color-white: #fff !important;
   --color-black: #000 !important;
   --color-transparent: transparent !important;
