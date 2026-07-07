@@ -1,178 +1,28 @@
-const COLOR_OVERRIDES = `
-  --c-white: #ffffff !important;
-  --c-slate-50: #f8fafc !important;
-  --c-slate-100: #f1f5f9 !important;
-  --c-slate-200: #e2e8f0 !important;
-  --c-slate-300: #cbd5e1 !important;
-  --c-slate-400: #94a3b8 !important;
-  --c-slate-500: #64748b !important;
-  --c-slate-600: #475569 !important;
-  --c-slate-700: #334155 !important;
-  --c-slate-800: #1e293b !important;
-  --c-slate-900: #0f172a !important;
-  --c-slate-950: #020617 !important;
-
-  --bg-primary: #020617 !important;
-  --bg-secondary: #0f172a !important;
-  --bg-card: rgba(15, 23, 42, 0.5) !important;
-  --bg-surface: #020617 !important;
-  --bg-elevated: #0f172a !important;
-  --text-primary: #f8fafc !important;
-  --text-secondary: #e2e8f0 !important;
-  --text-muted: #94a3b8 !important;
-  --border: #1e293b !important;
-  --scrollbar-track: #020617 !important;
-  --scrollbar-thumb: #334155 !important;
-
-  --color-white: #fff !important;
-  --color-black: #000 !important;
-  --color-transparent: transparent !important;
-  --color-current: currentColor !important;
-  --color-inherit: inherit !important;
-  --color-slate-50: #f8fafc !important;
-  --color-slate-100: #f1f5f9 !important;
-  --color-slate-200: #e2e8f0 !important;
-  --color-slate-300: #cbd5e1 !important;
-  --color-slate-400: #94a3b8 !important;
-  --color-slate-500: #64748b !important;
-  --color-slate-600: #475569 !important;
-  --color-slate-700: #334155 !important;
-  --color-slate-800: #1e293b !important;
-  --color-slate-900: #0f172a !important;
-  --color-slate-950: #020617 !important;
-  --color-gray-50: #f9fafb !important;
-  --color-gray-100: #f3f4f6 !important;
-  --color-gray-200: #e5e7eb !important;
-  --color-gray-300: #d1d5db !important;
-  --color-gray-400: #9ca3af !important;
-  --color-gray-500: #6b7280 !important;
-  --color-gray-600: #4b5563 !important;
-  --color-gray-700: #374151 !important;
-  --color-gray-800: #1f2937 !important;
-  --color-gray-900: #111827 !important;
-  --color-gray-950: #030712 !important;
-  --color-red-50: #fef2f2 !important;
-  --color-red-100: #fee2e2 !important;
-  --color-red-200: #fecaca !important;
-  --color-red-300: #fca5a5 !important;
-  --color-red-400: #f87171 !important;
-  --color-red-500: #ef4444 !important;
-  --color-red-600: #dc2626 !important;
-  --color-red-700: #b91c1c !important;
-  --color-red-800: #991b1b !important;
-  --color-red-900: #7f1d1d !important;
-  --color-red-950: #450a0a !important;
-  --color-rose-50: #fff1f2 !important;
-  --color-rose-100: #ffe4e6 !important;
-  --color-rose-200: #fecdd3 !important;
-  --color-rose-300: #fda4af !important;
-  --color-rose-400: #fb7185 !important;
-  --color-rose-500: #f43f5e !important;
-  --color-rose-600: #e11d48 !important;
-  --color-rose-700: #be123c !important;
-  --color-rose-800: #9f1239 !important;
-  --color-rose-900: #881337 !important;
-  --color-rose-950: #4c0519 !important;
-  --color-amber-50: #fffbeb !important;
-  --color-amber-100: #fef3c7 !important;
-  --color-amber-200: #fde68a !important;
-  --color-amber-300: #fcd34d !important;
-  --color-amber-400: #fbbf24 !important;
-  --color-amber-500: #f59e0b !important;
-  --color-amber-600: #d97706 !important;
-  --color-amber-700: #b45309 !important;
-  --color-amber-800: #92400e !important;
-  --color-amber-900: #78350f !important;
-  --color-amber-950: #451a03 !important;
-  --color-emerald-50: #ecfdf5 !important;
-  --color-emerald-100: #d1fae5 !important;
-  --color-emerald-200: #a7f3d0 !important;
-  --color-emerald-300: #6ee7b7 !important;
-  --color-emerald-400: #34d399 !important;
-  --color-emerald-500: #10b981 !important;
-  --color-emerald-600: #059669 !important;
-  --color-emerald-700: #047857 !important;
-  --color-emerald-800: #065f46 !important;
-  --color-emerald-900: #064e3b !important;
-  --color-emerald-950: #022c22 !important;
-  --color-green-50: #f0fdf4 !important;
-  --color-green-100: #dcfce7 !important;
-  --color-green-200: #bbf7d0 !important;
-  --color-green-300: #86efac !important;
-  --color-green-400: #4ade80 !important;
-  --color-green-500: #22c55e !important;
-  --color-green-600: #16a34a !important;
-  --color-green-700: #15803d !important;
-  --color-green-800: #166534 !important;
-  --color-green-900: #14532d !important;
-  --color-green-950: #052e16 !important;
-  --color-blue-50: #eff6ff !important;
-  --color-blue-100: #dbeafe !important;
-  --color-blue-200: #bfdbfe !important;
-  --color-blue-300: #93c5fd !important;
-  --color-blue-400: #60a5fa !important;
-  --color-blue-500: #3b82f6 !important;
-  --color-blue-600: #2563eb !important;
-  --color-blue-700: #1d4ed8 !important;
-  --color-blue-800: #1e40af !important;
-  --color-blue-900: #1e3a8a !important;
-  --color-blue-950: #172554 !important;
-  --color-purple-50: #faf5ff !important;
-  --color-purple-100: #f3e8ff !important;
-  --color-purple-200: #e9d5ff !important;
-  --color-purple-300: #d8b4fe !important;
-  --color-purple-400: #c084fc !important;
-  --color-purple-500: #a855f7 !important;
-  --color-purple-600: #9333ea !important;
-  --color-purple-700: #7e22ce !important;
-  --color-purple-800: #6b21a8 !important;
-  --color-purple-900: #581c87 !important;
-  --color-purple-950: #3b0764 !important;
-  --color-pink-50: #fdf2f8 !important;
-  --color-pink-100: #fce7f3 !important;
-  --color-pink-200: #fbcfe8 !important;
-  --color-pink-300: #f9a8d4 !important;
-  --color-pink-400: #f472b6 !important;
-  --color-pink-500: #ec4899 !important;
-  --color-pink-600: #db2777 !important;
-  --color-pink-700: #be185d !important;
-  --color-pink-800: #9d174d !important;
-  --color-pink-900: #831843 !important;
-  --color-pink-950: #500724 !important;
-  --color-orange-50: #fff7ed !important;
-  --color-orange-100: #ffedd5 !important;
-  --color-orange-200: #fed7aa !important;
-  --color-orange-300: #fdba74 !important;
-  --color-orange-400: #fb923c !important;
-  --color-orange-500: #f97316 !important;
-  --color-orange-600: #ea580c !important;
-  --color-orange-700: #c2410c !important;
-  --color-orange-800: #9a3412 !important;
-  --color-orange-900: #7c2d12 !important;
-  --color-orange-950: #431407 !important;
-  --color-yellow-50: #fefce8 !important;
-  --color-yellow-100: #fef9c3 !important;
-  --color-yellow-200: #fef08a !important;
-  --color-yellow-300: #fde047 !important;
-  --color-yellow-400: #facc15 !important;
-  --color-yellow-500: #eab308 !important;
-  --color-yellow-600: #ca8a04 !important;
-  --color-yellow-700: #a16207 !important;
-  --color-yellow-800: #854d0e !important;
-  --color-yellow-900: #713f12 !important;
-  --color-yellow-950: #422006 !important;
-  --color-cyan-50: #ecfeff !important;
-  --color-cyan-100: #cffafe !important;
-  --color-cyan-200: #a5f3fc !important;
-  --color-cyan-300: #67e8f9 !important;
-  --color-cyan-400: #22d3ee !important;
-  --color-cyan-500: #06b6d4 !important;
-  --color-cyan-600: #0891b2 !important;
-  --color-cyan-700: #0e7490 !important;
-  --color-cyan-800: #155e75 !important;
-  --color-cyan-900: #164e63 !important;
-  --color-cyan-950: #083344 !important;
-`;
+const DARK_VARS = [
+  ["--c-white", "#ffffff"],
+  ["--c-slate-50", "#f8fafc"],
+  ["--c-slate-100", "#f1f5f9"],
+  ["--c-slate-200", "#e2e8f0"],
+  ["--c-slate-300", "#cbd5e1"],
+  ["--c-slate-400", "#94a3b8"],
+  ["--c-slate-500", "#64748b"],
+  ["--c-slate-600", "#475569"],
+  ["--c-slate-700", "#334155"],
+  ["--c-slate-800", "#1e293b"],
+  ["--c-slate-900", "#0f172a"],
+  ["--c-slate-950", "#020617"],
+  ["--bg-primary", "#020617"],
+  ["--bg-secondary", "#0f172a"],
+  ["--bg-card", "rgba(15,23,42,0.5)"],
+  ["--bg-surface", "#020617"],
+  ["--bg-elevated", "#0f172a"],
+  ["--text-primary", "#f8fafc"],
+  ["--text-secondary", "#e2e8f0"],
+  ["--text-muted", "#94a3b8"],
+  ["--border", "#1e293b"],
+  ["--scrollbar-track", "#020617"],
+  ["--scrollbar-thumb", "#334155"],
+];
 
 export function getHtml2canvasOptions(bgColor = "#020617") {
   return {
@@ -181,9 +31,11 @@ export function getHtml2canvasOptions(bgColor = "#020617") {
     useCORS: true,
     logging: false,
     onclone: (doc: Document) => {
-      const style = doc.createElement("style");
-      style.textContent = `:root { ${COLOR_OVERRIDES} }`;
-      doc.head.appendChild(style);
+      const root = doc.documentElement;
+      root.classList.remove("light");
+      for (const [name, value] of DARK_VARS) {
+        root.style.setProperty(name, value);
+      }
     },
   };
 }
