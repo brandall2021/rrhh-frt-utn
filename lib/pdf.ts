@@ -40,25 +40,40 @@ const UNSUPPORTED_COLOR = /^(oklab|oklch|lab|lch|color-mix|color)\b/i;
 const COLOR_PROPS = [
   "background-color", "color",
   "border-top-color", "border-right-color", "border-bottom-color", "border-left-color",
-  "outline-color", "text-decoration-color", "column-rule-color",
+  "outline-color",
 ];
 
 function fixColors(doc: Document) {
-  const canvas = doc.createElement("canvas");
-  const ctx = canvas.getContext("2d")!;
-  const win = doc.defaultView!;
+  for (const el of doc.querySelectorAll("style")) {
+    const css = el.textContent || "";
+    const out: string[] = [];
+    let i = 0;
+    while (i < css.length) {
+      const m = css.slice(i).match(
+        /^@supports\s*\(\s*color\s*:\s*color-mix\(in lab,\s*red,\s*red\)\s*\)\s*\{/
+      );
+      if (m) {
+        i += m[0].length;
+        let d = 1;
+        while (i < css.length && d > 0) {
+          if (css[i] === "{") d++;
+          else if (css[i] === "}") d--;
+          i++;
+        }
+      } else {
+        out.push(css[i]);
+        i++;
+      }
+    }
+    el.textContent = out.join("");
+  }
 
   for (const el of doc.querySelectorAll("*")) {
-    const style = (el as HTMLElement).style;
+    const s = (el as HTMLElement).style;
     for (const prop of COLOR_PROPS) {
-      try {
-        const computed = win.getComputedStyle(el).getPropertyValue(prop);
-        if (computed && UNSUPPORTED_COLOR.test(computed)) {
-          ctx.fillStyle = computed;
-          style.setProperty(prop, ctx.fillStyle);
-        }
-      } catch {
-        // element may not support getComputedStyle or color conversion
+      const val = s.getPropertyValue(prop);
+      if (val && UNSUPPORTED_COLOR.test(val.trim())) {
+        s.removeProperty(prop);
       }
     }
   }
