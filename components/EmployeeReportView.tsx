@@ -11,6 +11,9 @@ import {
   formatDateToISO,
 } from "@/lib/calendar";
 import { Edit, ChevronLeft, ChevronRight, Trash2, X, Info, Download, BarChart3 } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { getHtml2canvasOptions } from "@/lib/pdf";
 
 interface EmployeeReportViewProps {
   onBack: () => void;
@@ -211,9 +214,6 @@ export default function EmployeeReportView({
             <button
               onClick={async () => {
                 try {
-                  const { default: jsPDF } = await import("jspdf");
-                  const html2canvas = (await import("html2canvas")).default;
-                  const { getHtml2canvasOptions } = await import("@/lib/pdf");
                   const reportEl = document.getElementById("employee-report-content");
                   if (!reportEl) return;
                   const canvas = await html2canvas(reportEl, getHtml2canvasOptions());

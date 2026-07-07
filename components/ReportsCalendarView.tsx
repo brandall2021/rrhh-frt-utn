@@ -22,6 +22,9 @@ import {
   COLOR_CONFIGS,
   formatDateToISO,
 } from "@/lib/calendar";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { getHtml2canvasOptions } from "@/lib/pdf";
 
 export default function ReportsCalendarView() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -249,9 +252,6 @@ export default function ReportsCalendarView() {
                 <button
                   onClick={async () => {
                     try {
-                      const { default: jsPDF } = await import("jspdf");
-                      const html2canvas = (await import("html2canvas")).default;
-                      const { getHtml2canvasOptions } = await import("@/lib/pdf");
                       const reportEl = document.getElementById("report-attendance-calendar");
                       if (!reportEl) return;
                       const canvas = await html2canvas(reportEl, getHtml2canvasOptions());

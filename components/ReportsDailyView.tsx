@@ -16,6 +16,9 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import type { DailyReport, DailyReportEntry } from "@/lib/reports";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { getHtml2canvasOptions } from "@/lib/pdf";
 
 const COLOR_MAP: Record<string, string> = {
   red: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -60,9 +63,6 @@ export default function ReportsDailyView() {
 
   const handleDownloadPdf = async () => {
     try {
-      const { default: jsPDF } = await import("jspdf");
-      const html2canvas = (await import("html2canvas")).default;
-      const { getHtml2canvasOptions } = await import("@/lib/pdf");
       const el = document.getElementById("report-daily-content");
       if (!el) return;
 
