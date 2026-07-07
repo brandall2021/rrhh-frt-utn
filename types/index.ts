@@ -3,23 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum NovedadType {
-  PARTICULAR = "PARTICULAR",
-  ESTUDIO = "ESTUDIO",
-  COMPENSATORIO = "COMPENSATORIO",
-  ENFERMEDAD = "ENFERMEDAD",
-  MEDICA = "MEDICA",
-  MATERNIDAD = "MATERNIDAD",
-  AUSENCIA = "AUSENCIA",
-  OTROS = "OTROS",
-}
+import { NovedadType, RequestState } from "@prisma/client";
 
-export enum RequestState {
-  PENDIENTE = "PENDIENTE",
-  APROBADO = "APROBADO",
-  RECHAZADO = "RECHAZADO",
-  PROCESADO = "PROCESADO",
-}
+export { NovedadType, RequestState };
 
 export interface Employee {
   id: string;

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ClipboardCheck,
@@ -90,8 +90,8 @@ export default function DashboardView({
   const pendingRequests = requests.filter((r) => r.state === RequestState.PENDIENTE);
   const approvedCount = requests.filter(
     (r) => r.state === RequestState.APROBADO || r.state === RequestState.PROCESADO
-  ).length + 142; // Add mockup baseline count
-  const rejectedCount = requests.filter((r) => r.state === RequestState.RECHAZADO).length + 8; // Baseline count
+  ).length;
+  const rejectedCount = requests.filter((r) => r.state === RequestState.RECHAZADO).length;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedPending = pendingRequests.slice(startIndex, startIndex + itemsPerPage);
@@ -106,14 +106,7 @@ export default function DashboardView({
   const currentCalendarMonth = `${MONTH_NAMES_SPANISH[calMonth]} ${calYear}`;
   const calendarDays = getCalendarDays(calYear, calMonth);
 
-  // Quick Calendar Event highlights mapping
-  const calendarEvents: Record<number, { type: NovedadType; code: string; name: string }> = {
-    15: { type: NovedadType.ESTUDIO, code: "ES", name: "Martina Rodriguez" },
-    16: { type: NovedadType.ESTUDIO, code: "ES", name: "Martina Rodriguez" },
-    17: { type: NovedadType.ESTUDIO, code: "ES", name: "Martina Rodriguez" },
-    18: { type: NovedadType.ENFERMEDAD, code: "MD", name: "Sofia Mendez" },
-    20: { type: NovedadType.PARTICULAR, code: "PA", name: "Javier Casal" },
-  };
+  const calendarEvents: Record<number, { type: NovedadType; code: string; name: string }> = {};
 
   const handleDayClick = (dayNum: number) => {
     setSelectedCalendarDay(dayNum);
@@ -232,14 +225,26 @@ export default function DashboardView({
             </h2>
             <div className="flex gap-1.5">
               <button
-                onClick={() => alert("Función de filtrado avanzado de novedades.")}
+                onClick={() => setCurrentPage(1)}
                 className="p-2 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
+                title="Resetear paginación"
               >
                 <Filter className="w-4 h-4" />
               </button>
               <button
-                onClick={() => alert("Reporte de asistencia (.CSV) preparado para descarga.")}
+                onClick={() => {
+                  const csv = [
+                    ['Empleado','Tipo','Inicio','Fin','Días','Estado'],
+                    ...requests.map(r => [r.employeeName, r.type, r.startDate, r.endDate, r.days, r.state])
+                  ].map(r => r.join(',')).join('\n')
+                  const blob = new Blob([csv], { type: 'text/csv' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url; a.download = 'novedades.csv'; a.click()
+                  URL.revokeObjectURL(url)
+                }}
                 className="p-2 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
+                title="Descargar CSV"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -444,7 +449,7 @@ export default function DashboardView({
 
                   <div className="mt-3 pt-2 text-center border-t border-slate-800/60">
                     <button
-                      onClick={() => alert("Correlación de superposición proyectada en calendario de equipo.")}
+                      onClick={() => window.open(`/reports/calendario?conflict=${conf.id}`, '_blank')}
                       className="text-brand-light hover:text-brand-lighter text-[10px] font-bold tracking-tight hover:underline cursor-pointer"
                     >
                       Superposición de calendario

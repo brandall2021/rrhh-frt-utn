@@ -37,6 +37,8 @@ model AuditLog {
   adminName   String?
   ipAddress   String?
   createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 model Department {
@@ -99,6 +101,9 @@ model Document {
   rejectReason String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+
+  @@index([employeeId])
+  @@index([expiryDate])
 }
 
 model AbsenceType {
@@ -107,6 +112,7 @@ model AbsenceType {
   code      String
   color     String
   absences  Absence[]
+  createdAt DateTime  @default(now())
 }
 
 model Absence {
@@ -117,6 +123,10 @@ model Absence {
   notes         String?
   absenceType   AbsenceType @relation(fields: [absenceTypeId], references: [id])
   employee      Employee    @relation(fields: [employeeId], references: [id])
+  createdAt     DateTime    @default(now())
+
+  @@unique([employeeId, date])
+  @@index([date])
 }
 
 enum EmployeeStatus {

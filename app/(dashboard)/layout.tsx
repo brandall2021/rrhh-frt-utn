@@ -43,6 +43,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const currentView = PATH_TO_VIEW[pathname] ?? (
     pathname.startsWith("/configuracion/plantillas/") ? "plantillas"
@@ -60,8 +61,8 @@ export default function DashboardLayout({
       <Header
         currentView={currentView}
         onViewChange={handleViewChange}
-        searchTerm=""
-        onSearchChange={() => {}}
+        searchTerm={searchTerm}
+        onSearchChange={(t: string) => setSearchTerm(t)}
         onToggleSidebar={() => setSidebarOpen((p) => !p)}
       />
       <div className="flex-1 flex overflow-hidden relative">

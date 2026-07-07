@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { signOut } from "next-auth/react";
 import {
   ClipboardCheck,
   Users,
@@ -212,14 +213,14 @@ export default function Sidebar({
 
       <div className="px-3 pt-4 border-t border-slate-900 space-y-1">
         <button
-          onClick={() => alert("Soporte Técnico FACE UNT - Central de Ayuda activa.")}
+          onClick={() => window.open('mailto:soporte@face.unt.edu.ar', '_blank')}
           className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-900/50 text-slate-400 hover:text-brand-light rounded-xl text-xs font-medium transition-all cursor-pointer"
         >
           <HelpCircle className="w-4 h-4" />
           <span>Ayuda</span>
         </button>
         <button
-          onClick={() => alert("Sesión finalizada. En un entorno de producción, esto redirigirá al login.")}
+          onClick={() => signOut({ callbackUrl: "/login" })}
           className="w-full flex items-center gap-3 px-4 py-2 hover:bg-rose-950/20 text-rose-400 hover:text-rose-300 rounded-xl text-xs font-medium transition-all cursor-pointer"
         >
           <LogOut className="w-4 h-4" />

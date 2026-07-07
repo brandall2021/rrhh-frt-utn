@@ -2,12 +2,17 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { getEmployees, createEmployee } from "@/lib/employees";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const data = await getEmployees();
-  return Response.json({ data });
+  const url = new URL(request.url)
+  const search = url.searchParams.get('search') || undefined
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 200, 500)
+  const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0)
+
+  const result = await getEmployees({ search, limit, offset });
+  return Response.json(result);
 }
 
 export async function POST(request: Request) {

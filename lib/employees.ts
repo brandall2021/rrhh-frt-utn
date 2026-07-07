@@ -33,16 +33,34 @@ function formatDate(d: Date | null | undefined): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function getEmployees() {
-  const employees = await prisma.employee.findMany({
-    orderBy: [{ status: "asc" }, { lastName: "asc" }],
-    include: {
-      documents: { select: { status: true } },
-      department: { select: { id: true, name: true } },
-    },
-  });
+export async function getEmployees(opts?: { search?: string; limit?: number; offset?: number }) {
+  const where: Prisma.EmployeeWhereInput = {}
+  if (opts?.search) {
+    const s = opts.search
+    where.OR = [
+      { firstName: { contains: s, mode: 'insensitive' } },
+      { lastName: { contains: s, mode: 'insensitive' } },
+      { email: { contains: s, mode: 'insensitive' } },
+      { cuil: { contains: s } },
+      { id: { contains: s } },
+    ]
+  }
 
-  return employees.map(({ department, documents, hireDate, exitDate, birthDate, createdAt, updatedAt, ...rest }) => ({
+  const [employees, total] = await Promise.all([
+    prisma.employee.findMany({
+      where,
+      orderBy: [{ status: "asc" }, { lastName: "asc" }],
+      skip: opts?.offset ?? 0,
+      take: opts?.limit ?? 200,
+      include: {
+        documents: { select: { status: true } },
+        department: { select: { id: true, name: true } },
+      },
+    }),
+    prisma.employee.count({ where }),
+  ])
+
+  const items = employees.map(({ department, documents, hireDate, exitDate, birthDate, createdAt, updatedAt, ...rest }) => ({
     ...rest,
     department: department.name,
     departmentId: department.id,
@@ -52,7 +70,9 @@ export async function getEmployees() {
     ...computeDocStats(documents),
     workedDaysThisMonth: 0,
     totalDaysThisMonth: 22,
-  }));
+  }))
+
+  return { items, total }
 }
 
 export async function getEmployeeById(id: string) {
@@ -109,7 +129,7 @@ export async function createEmployee(data: Record<string, unknown>) {
       status: parsed.status,
       hireDate: new Date(parsed.hireDate),
       exitDate: parsed.exitDate ? new Date(parsed.exitDate) : null,
-      emergencyContact: (parsed.emergencyContact ?? {}) as any,
+      emergencyContact: (parsed.emergencyContact ?? {}) as Prisma.JsonObject,
     },
   });
 }
@@ -131,11 +151,11 @@ export async function updateEmployee(id: string, data: Record<string, unknown>) 
   if (parsed.hireDate !== undefined) prismaData.hireDate = new Date(parsed.hireDate);
   if (parsed.exitDate !== undefined) prismaData.exitDate = parsed.exitDate ? new Date(parsed.exitDate) : null;
   if (parsed.birthDate !== undefined) prismaData.birthDate = new Date(parsed.birthDate);
-  if (parsed.emergencyContact !== undefined) prismaData.emergencyContact = parsed.emergencyContact as any;
+  if (parsed.emergencyContact !== undefined) prismaData.emergencyContact = parsed.emergencyContact;
   try {
     return await prisma.employee.update({
       where: { id },
-      data: prismaData as any,
+      data: prismaData as Prisma.EmployeeUpdateInput,
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {

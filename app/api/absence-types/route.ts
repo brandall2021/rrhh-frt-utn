@@ -42,10 +42,12 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const types = body.types as { name: string; code: string; color: string }[];
 
-    await prisma.absenceType.deleteMany();
-    await prisma.absenceType.createMany({ data: types });
+    const saved = await prisma.$transaction(async (tx) => {
+      await tx.absenceType.deleteMany();
+      await tx.absenceType.createMany({ data: types });
+      return tx.absenceType.findMany({ orderBy: { name: "asc" } });
+    });
 
-    const saved = await prisma.absenceType.findMany({ orderBy: { name: "asc" } });
     return Response.json({ data: saved });
   } catch {
     return Response.json({ error: "Invalid request" }, { status: 400 });

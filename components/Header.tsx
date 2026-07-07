@@ -105,16 +105,18 @@ export default function Header({
 
         {/* Action Widgets */}
         <button
-          onClick={() => alert("Central de novedades: No hay alertas pendientes.")}
+          onClick={() => onViewChange("auditoria")}
           className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-brand-light transition-colors relative cursor-pointer"
+          title="Ver auditoría"
         >
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
         </button>
 
         <button
-          onClick={() => alert("Configuraciones del panel de recursos humanos.")}
+          onClick={() => onViewChange("settings")}
           className="p-2 hover:bg-slate-900 rounded-lg text-slate-400 hover:text-brand-light transition-colors cursor-pointer"
+          title="Configuración"
         >
           <Settings className="w-4 h-4" />
         </button>

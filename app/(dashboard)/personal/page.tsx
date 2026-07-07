@@ -14,8 +14,8 @@ export default function PersonalPage() {
   const fetchEmployees = useCallback(async () => {
     try {
       const res = await fetch("/api/employees");
-      const { data } = await res.json();
-      setEmployees(data ?? []);
+      const json = await res.json();
+      setEmployees(json.items ?? json.data ?? []);
     } catch (error) {
       console.error("Error fetching employees:", error);
     } finally {
