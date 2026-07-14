@@ -1,9 +1,9 @@
 /**
  * PDF Generation utilities for Precision HR
- * Handles html2canvas + jsPDF with proper error handling
+ * Handles html2canvas + jsPDF with oklab/lab/color-mix compatibility
  */
 
-const DARK_VARS = [
+const DARK_VARS: [string, string][] = [
   ["--c-white", "#ffffff"],
   ["--c-slate-50", "#f8fafc"],
   ["--c-slate-100", "#f1f5f9"],
@@ -48,31 +48,64 @@ const COLOR_PROPS = [
   "outline-color",
 ];
 
-function fixColors(doc: Document) {
-  for (const el of doc.querySelectorAll("style")) {
-    const css = el.textContent || "";
-    const out: string[] = [];
-    let i = 0;
-    while (i < css.length) {
-      const m = css.slice(i).match(
-        /^@supports\s*\(\s*color\s*:\s*color-mix\(in lab,\s*red,\s*red\)\s*\)\s*\{/
-      );
-      if (m) {
-        i += m[0].length;
-        let d = 1;
-        while (i < css.length && d > 0) {
-          if (css[i] === "{") d++;
-          else if (css[i] === "}") d--;
-          i++;
-        }
-      } else {
-        out.push(css[i]);
+/**
+ * Remove all @supports blocks containing color-mix (generates oklab)
+ * and strip oklab/oklch/lab/lch from CSS text
+ */
+function sanitizeCssText(css: string): string {
+  let result = "";
+  let i = 0;
+
+  while (i < css.length) {
+    // Match @supports blocks with color-mix
+    const supportsMatch = css.slice(i).match(
+      /^@supports\s*\([^)]*color-mix[^)]*\)\s*\{/
+    );
+    if (supportsMatch) {
+      i += supportsMatch[0].length;
+      let depth = 1;
+      while (i < css.length && depth > 0) {
+        if (css[i] === "{") depth++;
+        else if (css[i] === "}") depth--;
         i++;
       }
+      continue;
     }
-    el.textContent = out.join("");
+
+    // Match and replace oklab/oklch/lab/lch function calls
+    const colorFnMatch = css.slice(i).match(/^(oklab|oklch|lab|lch)\s*\([^)]*\)/i);
+    if (colorFnMatch) {
+      result += "#888888"; // Fallback gray
+      i += colorFnMatch[0].length;
+      continue;
+    }
+
+    // Match color-mix function
+    const colorMixMatch = css.slice(i).match(/^color-mix\s*\([^)]*\)/i);
+    if (colorMixMatch) {
+      result += "#888888"; // Fallback gray
+      i += colorMixMatch[0].length;
+      continue;
+    }
+
+    result += css[i];
+    i++;
   }
 
+  return result;
+}
+
+/**
+ * Aggressively fix all colors in the cloned document
+ */
+function fixColors(doc: Document) {
+  // 1. Remove @supports color-mix blocks from <style> tags and sanitize CSS text
+  for (const el of doc.querySelectorAll("style")) {
+    const css = el.textContent || "";
+    el.textContent = sanitizeCssText(css);
+  }
+
+  // 2. Remove oklab/oklch/lab/lch from inline styles
   for (const el of doc.querySelectorAll("*")) {
     const s = (el as HTMLElement).style;
     for (const prop of COLOR_PROPS) {
@@ -81,6 +114,61 @@ function fixColors(doc: Document) {
         s.removeProperty(prop);
       }
     }
+  }
+
+  // 3. Scan all stylesheet rules and remove unsupported colors
+  try {
+    for (const sheet of doc.styleSheets) {
+      try {
+        const rules = sheet.cssRules || sheet.rules;
+        if (!rules) continue;
+        const toRemove: CSSRule[] = [];
+        for (let i = 0; i < rules.length; i++) {
+          const rule = rules[i];
+          if (rule instanceof CSSStyleRule) {
+            const text = rule.cssText;
+            if (UNSUPPORTED_COLOR.test(text) || /color-mix/i.test(text)) {
+              // Replace oklab values in the rule text
+              let fixed = text
+                .replace(/oklab\s*\([^)]*\)/gi, "#888888")
+                .replace(/oklch\s*\([^)]*\)/gi, "#888888")
+                .replace(/lab\s*\([^)]*\)/gi, "#888888")
+                .replace(/lch\s*\([^)]*\)/gi, "#888888")
+                .replace(/color-mix\s*\([^)]*\)/gi, "#888888");
+              try {
+                rule.parentStyleSheet?.deleteRule(i);
+                rule.parentStyleSheet?.insertRule(fixed, i);
+              } catch {
+                // Skip rules that can't be modified
+              }
+            }
+          } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) {
+            // Check nested rules
+            try {
+              const nestedRules = rule.cssRules || [];
+              for (let j = nestedRules.length - 1; j >= 0; j--) {
+                const nested = nestedRules[j];
+                if (nested instanceof CSSStyleRule) {
+                  if (UNSUPPORTED_COLOR.test(nested.cssText) || /color-mix/i.test(nested.cssText)) {
+                    try {
+                      rule.deleteRule(j);
+                    } catch {
+                      // Skip
+                    }
+                  }
+                }
+              }
+            } catch {
+              // Skip
+            }
+          }
+        }
+      } catch {
+        // Cross-origin stylesheet, skip
+      }
+    }
+  } catch {
+    // Error accessing stylesheets, skip
   }
 }
 
