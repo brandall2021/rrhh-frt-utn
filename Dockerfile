@@ -21,5 +21,9 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 RUN npm install -g prisma@5.22.0
+
+# Ensure proper permissions for uploads directory
+RUN mkdir -p /app/uploads/photos && chmod -R 755 /app/uploads
+
 EXPOSE 3000
 CMD ["sh", "-c", "prisma migrate deploy && node server.js"]

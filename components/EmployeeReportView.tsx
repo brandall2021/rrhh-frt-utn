@@ -11,9 +11,7 @@ import {
   formatDateToISO,
 } from "@/lib/calendar";
 import { Edit, ChevronLeft, ChevronRight, Trash2, X, Info, Download, BarChart3 } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { getHtml2canvasOptions } from "@/lib/pdf";
+import { generatePdfFromElement } from "@/lib/pdf";
 
 interface EmployeeReportViewProps {
   onBack: () => void;
@@ -213,30 +211,13 @@ export default function EmployeeReportView({
 
             <button
               onClick={async () => {
-                try {
-                  const reportEl = document.getElementById("employee-report-content");
-                  if (!reportEl) return;
-                  const canvas = await html2canvas(reportEl, getHtml2canvasOptions());
-                  const imgData = canvas.toDataURL("image/png");
-                  const pdf = new jsPDF("p", "mm", "a4");
-                  const pageWidth = pdf.internal.pageSize.getWidth();
-                  const imgWidth = pageWidth - 20;
-                  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                  let heightLeft = imgHeight;
-                  let position = 10;
-                  pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-                  heightLeft -= pdf.internal.pageSize.getHeight() - 20;
-                  while (heightLeft > 0) {
-                    position = heightLeft - imgHeight + 10;
-                    pdf.addPage();
-                    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-                    heightLeft -= pdf.internal.pageSize.getHeight() - 20;
+                await generatePdfFromElement(
+                  "employee-report-content",
+                  `asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`,
+                  {
+                    onError: (err) => alert("Error al generar el PDF: " + err.message),
                   }
-                  pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`);
-                } catch (err) {
-                  console.error("Error al generar PDF:", err);
-                  alert("Error al generar el PDF. Algunos estilos de la página no son compatibles con la exportación.");
-                }
+                );
               }}
               className="flex items-center gap-1.5 bg-[var(--border)] hover:bg-[var(--border-light)] text-[var(--text-secondary)] px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer border border-[var(--border-light)]"
             >

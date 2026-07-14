@@ -1,3 +1,8 @@
+/**
+ * PDF Generation utilities for Precision HR
+ * Handles html2canvas + jsPDF with proper error handling
+ */
+
 const DARK_VARS = [
   ["--c-white", "#ffffff"],
   ["--c-slate-50", "#f8fafc"],
@@ -84,7 +89,10 @@ export function getHtml2canvasOptions(bgColor = "#020617") {
     backgroundColor: bgColor,
     scale: 2,
     useCORS: true,
+    allowTaint: true,
     logging: false,
+    removeContainer: true,
+    imageTimeout: 15000,
     onclone: (doc: Document) => {
       const root = doc.documentElement;
       root.classList.remove("light");
@@ -94,4 +102,66 @@ export function getHtml2canvasOptions(bgColor = "#020617") {
       fixColors(doc);
     },
   };
+}
+
+/**
+ * Generate PDF from an HTML element
+ * Wraps html2canvas + jsPDF with proper error handling
+ */
+export async function generatePdfFromElement(
+  elementId: string,
+  filename: string,
+  options?: {
+    bgColor?: string;
+    onError?: (error: Error) => void;
+  }
+): Promise<boolean> {
+  try {
+    const el = document.getElementById(elementId);
+    if (!el) {
+      throw new Error(`Elemento #${elementId} no encontrado en el DOM`);
+    }
+
+    // Dynamically import to ensure client-side only
+    const { default: html2canvas } = await import("html2canvas");
+    const { default: jsPDF } = await import("jspdf");
+
+    const canvas = await html2canvas(el, getHtml2canvasOptions(options?.bgColor));
+    const imgData = canvas.toDataURL("image/png", 1.0);
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 10;
+
+    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight - 20;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + 10;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight - 20;
+    }
+
+    pdf.save(filename);
+    return true;
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("Error al generar PDF:", error);
+    options?.onError?.(error);
+    return false;
+  }
+}
+
+/**
+ * Check if PDF generation is supported in the current environment
+ */
+export function isPdfSupported(): boolean {
+  if (typeof window === "undefined") return false;
+  if (typeof document === "undefined") return false;
+  const canvas = document.createElement("canvas");
+  return canvas.getContext("2d") !== null;
 }

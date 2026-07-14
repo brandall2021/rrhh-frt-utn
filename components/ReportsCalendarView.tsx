@@ -24,7 +24,7 @@ import {
 } from "@/lib/calendar";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { getHtml2canvasOptions } from "@/lib/pdf";
+import { getHtml2canvasOptions, generatePdfFromElement } from "@/lib/pdf";
 
 export default function ReportsCalendarView() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -251,31 +251,13 @@ export default function ReportsCalendarView() {
                 </div>
                 <button
                   onClick={async () => {
-                    try {
-                      const reportEl = document.getElementById("report-attendance-calendar");
-                      if (!reportEl) return;
-                      const canvas = await html2canvas(reportEl, getHtml2canvasOptions());
-                      const imgData = canvas.toDataURL("image/png");
-                      const pdf = new jsPDF("p", "mm", "a4");
-                      const pageWidth = pdf.internal.pageSize.getWidth();
-                      const pageHeight = pdf.internal.pageSize.getHeight();
-                      const imgWidth = pageWidth - 20;
-                      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                      let heightLeft = imgHeight;
-                      let position = 10;
-                      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-                      heightLeft -= pageHeight - 20;
-                      while (heightLeft > 0) {
-                        position = heightLeft - imgHeight + 10;
-                        pdf.addPage();
-                        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-                        heightLeft -= pageHeight - 20;
+                    await generatePdfFromElement(
+                      "report-attendance-calendar",
+                      `asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${calendarYear}.pdf`,
+                      {
+                        onError: (err) => alert("Error al generar el PDF: " + err.message),
                       }
-                      pdf.save(`asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${calendarYear}.pdf`);
-                    } catch (err) {
-                      console.error("Error al generar PDF:", err);
-                      alert("Error al generar el PDF. Algunos estilos de la página no son compatibles con la exportación.");
-                    }
+                    );
                   }}
                   className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-slate-700"
                 >
