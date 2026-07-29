@@ -9,11 +9,24 @@ datasource db {
 }
 
 model AdminUser {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String       @id @default(cuid())
+  email     String       @unique
   name      String?
   image     String?
-  createdAt DateTime @default(now())
+  role      UserRole     @default(OPERADOR)
+  status    UserStatus   @default(ACTIVO)
+  createdAt DateTime     @default(now())
+}
+
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+  OPERADOR
+}
+
+enum UserStatus {
+  ACTIVO
+  INACTIVO
 }
 
 model EmailTemplate {

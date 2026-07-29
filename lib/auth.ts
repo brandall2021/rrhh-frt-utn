@@ -15,7 +15,9 @@ export const authOptions: NextAuthOptions = {
       const admin = await prisma.adminUser.findUnique({
         where: { email: user.email },
       });
-      return !!admin;
+      if (!admin) return false;
+      if (admin.status === "INACTIVO") return false;
+      return true;
     },
     async session({ session, token }) {
       if (token.sub && session.user) {
