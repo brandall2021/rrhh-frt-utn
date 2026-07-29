@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Settings, ClipboardCheck, Users, FileBarChart2, Sun, Moon, Menu, X, Clock } from "lucide-react";
+import { Search, Bell, Settings, LayoutDashboard, Users, CalendarRange, FileBarChart2, Sun, Moon, Menu, X, Clock } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 interface HeaderProps {
@@ -56,7 +56,7 @@ export default function Header({
                 : "text-slate-400 hover:text-white hover:bg-slate-900/50"
             }`}
           >
-            <ClipboardCheck className="w-3.5 h-3.5" />
+            <LayoutDashboard className="w-3.5 h-3.5" />
             <span>Dashboard</span>
           </button>
 
@@ -70,6 +70,18 @@ export default function Header({
           >
             <Users className="w-3.5 h-3.5" />
             <span>Personal</span>
+          </button>
+
+          <button
+            onClick={() => onViewChange("solicitudes")}
+            className={`font-semibold text-xs tracking-wide px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              currentView === "solicitudes"
+                ? "bg-brand/10 text-brand-light border border-brand/30 font-bold"
+                : "text-slate-400 hover:text-white hover:bg-slate-900/50"
+            }`}
+          >
+            <CalendarRange className="w-3.5 h-3.5" />
+            <span>Ausencias</span>
           </button>
 
           <button

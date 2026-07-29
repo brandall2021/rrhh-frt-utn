@@ -123,10 +123,10 @@ export default function DashboardView({
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-xl font-extrabold text-white tracking-tight antialiased">
-            Consola de Ausencias
+            Dashboard
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Monitoreo y aprobación automatizada de licencias, inasistencias y permisos del personal.
+            Monitoreo y aprobación de licencias, inasistencias y permisos del personal.
           </p>
         </div>
         <button
@@ -134,7 +134,7 @@ export default function DashboardView({
           className="bg-brand hover:bg-brand-hover text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 transition-all active:scale-95 cursor-pointer"
         >
           <span className="text-[15px] font-bold">+</span>
-          Nueva Novedad
+          Registrar Ausencia
         </button>
       </div>
 

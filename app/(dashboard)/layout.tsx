@@ -8,13 +8,20 @@ import Sidebar from "@/components/Sidebar";
 const PATH_TO_VIEW: Record<string, string> = {
   "/": "dashboard",
   "/personal": "personal",
+  "/solicitudes": "solicitudes",
+  "/solicitudes/nueva": "solicitudes-nueva",
+  "/vacaciones": "vacaciones",
+  "/conflictos": "conflictos",
   "/requests": "requests",
+  "/requests/new": "requests-new",
   "/reports": "reports",
   "/reports/diario": "reports-diario",
   "/reports/estadisticas": "reports-estadisticas",
   "/reports/calendario": "reports-calendario",
   "/birthdays": "birthdays",
   "/settings": "settings",
+  "/settings/usuarios": "settings-usuarios",
+  "/settings/roles": "settings-roles",
   "/configuracion/plantillas": "plantillas",
   "/configuracion/plantillas/nueva": "plantillas-nueva",
   "/auditoria": "auditoria",
@@ -23,13 +30,21 @@ const PATH_TO_VIEW: Record<string, string> = {
 const VIEW_TO_PATH: Record<string, string> = {
   dashboard: "/",
   personal: "/personal",
+  "personal-ficha": "/personal",
+  solicitudes: "/solicitudes",
+  "solicitudes-nueva": "/solicitudes/nueva",
+  vacaciones: "/vacaciones",
+  conflictos: "/conflictos",
   requests: "/requests",
+  "requests-new": "/requests/new",
   reports: "/reports",
   "reports-diario": "/reports/diario",
   "reports-estadisticas": "/reports/estadisticas",
   "reports-calendario": "/reports/calendario",
   birthdays: "/birthdays",
   settings: "/settings",
+  "settings-usuarios": "/settings/usuarios",
+  "settings-roles": "/settings/roles",
   plantillas: "/configuracion/plantillas",
   "plantillas-nueva": "/configuracion/plantillas/nueva",
   auditoria: "/auditoria",
@@ -47,12 +62,13 @@ export default function DashboardLayout({
 
   const currentView = PATH_TO_VIEW[pathname] ?? (
     pathname.startsWith("/configuracion/plantillas/") ? "plantillas"
-    : pathname === "/auditoria" ? "auditoria"
+    : pathname.startsWith("/personal/") ? "personal"
     : "dashboard"
   );
 
   const handleViewChange = (view: string) => {
-    router.push(VIEW_TO_PATH[view] ?? "/");
+    const path = VIEW_TO_PATH[view] ?? "/";
+    router.push(path);
     setSidebarOpen(false);
   };
 
@@ -66,7 +82,6 @@ export default function DashboardLayout({
         onToggleSidebar={() => setSidebarOpen((p) => !p)}
       />
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Mobile overlay */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/60 z-30 md:hidden"

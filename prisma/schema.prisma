@@ -70,6 +70,7 @@ model Employee {
   leaveRequests    LeaveRequest[]
   documents        Document[]
   absences         Absence[]
+  vacations        Vacation[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
@@ -129,6 +130,22 @@ model Absence {
   @@index([date])
 }
 
+model Vacation {
+  id            String   @id @default(cuid())
+  employeeId    String
+  employee      Employee @relation(fields: [employeeId], references: [id])
+  year          Int
+  totalDays     Int      // Días que le corresponden en el año
+  usedDays      Int      @default(0)
+  pendingPrev   Int      @default(0) // Días pendientes de años anteriores
+  observations  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([employeeId, year])
+  @@index([employeeId])
+}
+
 enum EmployeeStatus {
   ACTIVO
   INACTIVO
@@ -142,6 +159,7 @@ enum NovedadType {
   MEDICA
   MATERNIDAD
   AUSENCIA
+  VACACIONES
   OTROS
 }
 

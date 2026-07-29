@@ -114,3 +114,28 @@ export interface Absence {
   date: string;
   notes?: string;
 }
+
+export interface Vacation {
+  id: string;
+  employeeId: string;
+  employeeName?: string;
+  department?: string;
+  year: number;
+  totalDays: number;
+  usedDays: number;
+  pendingPrev: number;
+  availableDays: number;
+  observations?: string;
+}
+
+export interface VacationRequest {
+  id: string;
+  employeeId: string;
+  employeeName?: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  state: RequestState;
+  observations?: string;
+  createdAt: string;
+}
