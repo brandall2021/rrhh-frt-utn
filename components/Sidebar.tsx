@@ -198,6 +198,13 @@ export default function Sidebar({
           <Plus className="w-4 h-4" />
           Registrar Ausencia Programada
         </button>
+        <button
+          onClick={() => onViewChange("reports-calendario")}
+          className="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all border border-slate-700 cursor-pointer"
+        >
+          <Calendar className="w-4 h-4" />
+          Asistencia Individual
+        </button>
       </div>
 
       <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto">
