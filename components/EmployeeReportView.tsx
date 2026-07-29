@@ -306,7 +306,7 @@ export default function EmployeeReportView({
         </div>
 
         {/* Month Filter Tabs */}
-        <div className="flex gap-1 border-b border-[var(--border)] pb-3 md:pb-4 overflow-x-auto scrollbar-none -mx-3 px-3 md:mx-0 md:px-0">
+        <div data-pdf-hide className="flex gap-1 border-b border-[var(--border)] pb-3 md:pb-4 overflow-x-auto scrollbar-none -mx-3 px-3 md:mx-0 md:px-0">
           <button
             onClick={() => setSelectedMonthTab("Todos")}
             className={`px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all border cursor-pointer shrink-0 ${
@@ -333,7 +333,7 @@ export default function EmployeeReportView({
         </div>
 
         {/* Info Bar */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl md:rounded-2xl p-2.5 md:p-3 text-[10px] md:text-xs text-[var(--text-muted)] flex items-center gap-2 md:gap-3">
+        <div data-pdf-hide className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl md:rounded-2xl p-2.5 md:p-3 text-[10px] md:text-xs text-[var(--text-muted)] flex items-center gap-2 md:gap-3">
           <Info size={13} className="text-[var(--color-brand-light)] shrink-0" />
           <span>
             <strong className="text-[var(--text-primary)] uppercase text-[9px] md:text-[10px] tracking-wider mr-1">Atajo:</strong>

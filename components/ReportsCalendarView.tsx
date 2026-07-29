@@ -303,7 +303,7 @@ export default function ReportsCalendarView() {
               })}
             </div>
 
-            <div className="flex gap-1 border-b border-slate-800 pb-3 mb-4 overflow-x-auto scrollbar-none">
+            <div data-pdf-hide className="flex gap-1 border-b border-slate-800 pb-3 mb-4 overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setSelectedMonthTab("Todos")}
                 className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border cursor-pointer shrink-0 ${
@@ -329,7 +329,7 @@ export default function ReportsCalendarView() {
               ))}
             </div>
 
-            <div className="bg-slate-950/30 border border-slate-800 rounded-xl p-2.5 mb-4 text-[10px] text-slate-400 flex items-center gap-2">
+            <div data-pdf-hide className="bg-slate-950/30 border border-slate-800 rounded-xl p-2.5 mb-4 text-[10px] text-slate-400 flex items-center gap-2">
               <Info size={13} className="text-brand-light shrink-0" />
               <span>
                 <strong className="text-white uppercase text-[9px] tracking-wider mr-1">Atajo:</strong>

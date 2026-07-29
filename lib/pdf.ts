@@ -218,6 +218,10 @@ export function getHtml2canvasOptions(bgColor = "#020617") {
       for (const [name, value] of DARK_VARS) {
         root.style.setProperty(name, value);
       }
+      // Hide elements marked as non-essential for PDF
+      for (const el of doc.querySelectorAll("[data-pdf-hide]")) {
+        (el as HTMLElement).style.display = "none";
+      }
       fixColors(doc);
     },
   };
