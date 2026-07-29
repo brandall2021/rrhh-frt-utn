@@ -11,7 +11,7 @@ import {
   formatDateToISO,
 } from "@/lib/calendar";
 import { Edit, ChevronLeft, ChevronRight, Trash2, X, Info, Download, BarChart3 } from "lucide-react";
-import { generatePdfFromElement } from "@/lib/pdf";
+import { usePdfReport, PdfColumn } from "@/hooks/usePdfReport";
 
 interface EmployeeReportViewProps {
   onBack: () => void;
@@ -90,6 +90,7 @@ export default function EmployeeReportView({
       });
       return {
         monthIndex: idx,
+        name: MONTH_NAMES_SPANISH[idx],
         absences: monthAbsences.length,
         workingDays,
         rate: workingDays > 0 ? ((workingDays - monthAbsences.length) / workingDays) * 100 : 100,
@@ -150,23 +151,7 @@ export default function EmployeeReportView({
     setShowDayModal(false);
   };
 
-  const thStyle: React.CSSProperties = {
-    padding: "6px 8px",
-    textAlign: "center",
-    fontSize: 9,
-    fontWeight: 700,
-    color: "#f8fafc",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    borderBottom: "2px solid #334155",
-  };
-
-  const tdStyle: React.CSSProperties = {
-    padding: "5px 8px",
-    textAlign: "center",
-    fontSize: 10,
-    color: "#cbd5e1",
-  };
+  const { generatePdf } = usePdfReport();
 
   const getInitials = () => {
     const first = selectedEmployee.firstName?.[0] || "";
@@ -234,13 +219,25 @@ export default function EmployeeReportView({
 
             <button
               onClick={async () => {
-                await generatePdfFromElement(
-                  "employee-report-pdf",
-                  `asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`,
-                  {
-                    onError: (err) => alert("Error al generar el PDF: " + err.message),
-                  }
-                );
+                const ok = await generatePdf({
+                  title: "Reporte de Asistencias",
+                  subtitle: `${selectedEmployee.lastName}, ${selectedEmployee.firstName} — ${currentYear}`,
+                  filename: `asistencias_${selectedEmployee.lastName}_${selectedEmployee.firstName}_${currentYear}.pdf`,
+                  columns: [
+                    { header: "Mes", accessor: (m: any) => m.name, align: "left" },
+                    { header: "Días Lab.", accessor: (m: any) => m.workingDays, align: "center" },
+                    ...absenceTypes.map((t) => ({
+                      header: t.code,
+                      accessor: (m: any) => m.typeCounts[t.id] || "—",
+                      align: "center" as const,
+                    })),
+                    { header: "Total Aus.", accessor: (m: any) => m.absences, align: "center" },
+                    { header: "Asistencia", accessor: (m: any) => `${m.rate.toFixed(1)}%`, align: "center" },
+                  ],
+                  data: monthlyStats,
+                  footer: `Generado: ${new Date().toLocaleDateString("es-AR")}`,
+                });
+                if (!ok) alert("Error al generar el PDF");
               }}
               className="flex items-center gap-1.5 bg-[var(--border)] hover:bg-[var(--border-light)] text-[var(--text-secondary)] px-2.5 py-1.5 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer border border-[var(--border-light)]"
             >
@@ -454,107 +451,6 @@ export default function EmployeeReportView({
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* PDF Table (hidden from screen, captured by html2canvas) */}
-      <div
-        id="employee-report-pdf"
-        className="pdf-content"
-        style={{
-          position: "fixed",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "1024px",
-          zIndex: -1,
-          pointerEvents: "none",
-          background: "#0f172a",
-          padding: "24px",
-          fontFamily: "'Courier New', monospace",
-          color: "#e2e8f0",
-          fontSize: "11px",
-          lineHeight: "1.5",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: 16 }}>
-          <div style={{ color: "#38bdf8", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            Reporte de Asistencias
-          </div>
-          <div style={{ color: "#f8fafc", fontSize: 18, fontWeight: 800, marginTop: 2 }}>
-            {selectedEmployee.lastName}, {selectedEmployee.firstName}
-          </div>
-          <div style={{ color: "#94a3b8", fontSize: 11, marginTop: 2 }}>{currentYear}</div>
-        </div>
-
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
-          <thead>
-            <tr style={{ background: "#1e293b" }}>
-              <th style={thStyle}>Mes</th>
-              <th style={thStyle}>Días Lab.</th>
-              {absenceTypes.map((t) => (
-                <th key={t.id} style={{ ...thStyle, color: "#94a3b8", fontWeight: 400 }}>
-                  {t.code}
-                </th>
-              ))}
-              <th style={thStyle}>Total Aus.</th>
-              <th style={thStyle}>Asistencia</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MONTH_NAMES_SPANISH.map((name, idx) => {
-              const ms = monthlyStats[idx];
-              return (
-                <tr key={idx} style={{ borderBottom: "1px solid #1e293b" }}>
-                  <td style={tdStyle}>{name}</td>
-                  <td style={tdStyle}>{ms.workingDays}</td>
-                  {absenceTypes.map((t) => (
-                    <td key={t.id} style={{ ...tdStyle, color: ms.typeCounts[t.id] ? "#f8fafc" : "#475569" }}>
-                      {ms.typeCounts[t.id] || "—"}
-                    </td>
-                  ))}
-                  <td style={{ ...tdStyle, fontWeight: 700 }}>{ms.absences}</td>
-                  <td style={{ ...tdStyle, fontWeight: 700 }}>{ms.rate.toFixed(1)}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr style={{ background: "#1e293b", fontWeight: 800 }}>
-              <td style={{ ...tdStyle, color: "#f8fafc" }}>TOTAL</td>
-              <td style={{ ...tdStyle, color: "#f8fafc" }}>{monthlyStats.reduce((s, m) => s + m.workingDays, 0)}</td>
-              {absenceTypes.map((t) => {
-                const total = monthlyStats.reduce((s, m) => s + (m.typeCounts[t.id] || 0), 0);
-                return (
-                  <td key={t.id} style={{ ...tdStyle, color: total ? "#38bdf8" : "#475569" }}>
-                    {total || "—"}
-                  </td>
-                );
-              })}
-              <td style={{ ...tdStyle, color: "#f8fafc" }}>{monthlyStats.reduce((s, m) => s + m.absences, 0)}</td>
-              <td style={{ ...tdStyle, color: "#f8fafc" }}>
-                {attendanceRate.toFixed(1)}%
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-
-        {absenceTypes.length > 0 && (
-          <div style={{ marginTop: 12, fontSize: 10, display: "flex", gap: 16, color: "#94a3b8" }}>
-            <span style={{ fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Leyenda:
-            </span>
-            {absenceTypes.map((t) => (
-              <span key={t.id} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#38bdf8", display: "inline-block" }} />
-                {t.code}: {t.name}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div style={{ marginTop: 16, textAlign: "right", fontSize: 9, color: "#64748b", borderTop: "1px solid #1e293b", paddingTop: 8 }}>
-          Generado: {new Date().toLocaleDateString("es-AR")}
         </div>
       </div>
 
