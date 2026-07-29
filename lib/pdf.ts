@@ -42,40 +42,60 @@ const DARK_VARS: [string, string][] = [
 ];
 
 const UNSUPPORTED_COLOR = /^(oklab|oklch|lab|lch|color-mix|color)\b/i;
-const COLOR_PROPS = [
+const ALL_COLOR_PROPS = [
   "background-color", "color",
   "border-top-color", "border-right-color", "border-bottom-color", "border-left-color",
   "outline-color",
+  "text-decoration-color",
+  "caret-color",
+  "accent-color",
+  "column-rule-color",
+];
+const SVG_COLOR_ATTRS = ["fill", "stroke", "stop-color", "flood-color", "lighting-color"];
+
+function stripBlock(css: string, i: number): number {
+  let depth = 1;
+  let pos = i;
+  while (pos < css.length && depth > 0) {
+    if (css[pos] === "{") depth++;
+    else if (css[pos] === "}") depth--;
+    pos++;
+  }
+  return pos;
+}
+
+interface CssBlockMatcher {
+  pattern: RegExp;
+  handler: () => string;
+}
+
+const BLOCK_MATCHERS: CssBlockMatcher[] = [
+  // @supports with color-mix (never rendered, just contains fallback rules with oklab)
+  { pattern: /^@supports\s*\([^)]*color-mix[^)]*\)\s*\{/, handler: () => "" },
 ];
 
-/**
- * Remove all @supports blocks containing color-mix (generates oklab)
- * and strip oklab/oklch/lab/lch from CSS text
- */
 function sanitizeCssText(css: string): string {
   let result = "";
   let i = 0;
 
   while (i < css.length) {
-    // Match @supports blocks with color-mix
-    const supportsMatch = css.slice(i).match(
-      /^@supports\s*\([^)]*color-mix[^)]*\)\s*\{/
-    );
-    if (supportsMatch) {
-      i += supportsMatch[0].length;
-      let depth = 1;
-      while (i < css.length && depth > 0) {
-        if (css[i] === "{") depth++;
-        else if (css[i] === "}") depth--;
-        i++;
+    let matched = false;
+
+    for (const m of BLOCK_MATCHERS) {
+      const blockMatch = css.slice(i).match(m.pattern);
+      if (blockMatch) {
+        i += blockMatch[0].length;
+        i = stripBlock(css, i);
+        matched = true;
+        break;
       }
-      continue;
     }
+    if (matched) continue;
 
     // Match and replace oklab/oklch/lab/lch function calls
     const colorFnMatch = css.slice(i).match(/^(oklab|oklch|lab|lch)\s*\([^)]*\)/i);
     if (colorFnMatch) {
-      result += "#888888"; // Fallback gray
+      result += "#888888";
       i += colorFnMatch[0].length;
       continue;
     }
@@ -83,7 +103,7 @@ function sanitizeCssText(css: string): string {
     // Match color-mix function
     const colorMixMatch = css.slice(i).match(/^color-mix\s*\([^)]*\)/i);
     if (colorMixMatch) {
-      result += "#888888"; // Fallback gray
+      result += "#888888";
       i += colorMixMatch[0].length;
       continue;
     }
@@ -99,16 +119,16 @@ function sanitizeCssText(css: string): string {
  * Aggressively fix all colors in the cloned document
  */
 function fixColors(doc: Document) {
-  // 1. Remove @supports color-mix blocks from <style> tags and sanitize CSS text
+  // Pass 1: sanitize all <style> tag content
   for (const el of doc.querySelectorAll("style")) {
     const css = el.textContent || "";
     el.textContent = sanitizeCssText(css);
   }
 
-  // 2. Remove oklab/oklch/lab/lch from inline styles
+  // Pass 2: remove oklab/oklch/lab/lch from inline styles
   for (const el of doc.querySelectorAll("*")) {
     const s = (el as HTMLElement).style;
-    for (const prop of COLOR_PROPS) {
+    for (const prop of ALL_COLOR_PROPS) {
       const val = s.getPropertyValue(prop);
       if (val && UNSUPPORTED_COLOR.test(val.trim())) {
         s.removeProperty(prop);
@@ -116,19 +136,17 @@ function fixColors(doc: Document) {
     }
   }
 
-  // 3. Scan all stylesheet rules and remove unsupported colors
+  // Pass 3: scan stylesheet rules
   try {
     for (const sheet of doc.styleSheets) {
       try {
         const rules = sheet.cssRules || sheet.rules;
         if (!rules) continue;
-        const toRemove: CSSRule[] = [];
         for (let i = 0; i < rules.length; i++) {
           const rule = rules[i];
           if (rule instanceof CSSStyleRule) {
             const text = rule.cssText;
             if (UNSUPPORTED_COLOR.test(text) || /color-mix/i.test(text)) {
-              // Replace oklab values in the rule text
               let fixed = text
                 .replace(/oklab\s*\([^)]*\)/gi, "#888888")
                 .replace(/oklch\s*\([^)]*\)/gi, "#888888")
@@ -138,37 +156,50 @@ function fixColors(doc: Document) {
               try {
                 rule.parentStyleSheet?.deleteRule(i);
                 rule.parentStyleSheet?.insertRule(fixed, i);
-              } catch {
-                // Skip rules that can't be modified
-              }
+              } catch { /* skip */ }
             }
           } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) {
-            // Check nested rules
             try {
               const nestedRules = rule.cssRules || [];
               for (let j = nestedRules.length - 1; j >= 0; j--) {
                 const nested = nestedRules[j];
                 if (nested instanceof CSSStyleRule) {
                   if (UNSUPPORTED_COLOR.test(nested.cssText) || /color-mix/i.test(nested.cssText)) {
-                    try {
-                      rule.deleteRule(j);
-                    } catch {
-                      // Skip
-                    }
+                    try { rule.deleteRule(j); } catch { /* skip */ }
                   }
                 }
               }
-            } catch {
-              // Skip
-            }
+            } catch { /* skip */ }
           }
         }
-      } catch {
-        // Cross-origin stylesheet, skip
+      } catch { /* cross-origin */ }
+    }
+  } catch { /* skip */ }
+
+  // Pass 4: force style recalc, then check computed styles for remaining oklab values
+  void doc.body?.offsetHeight;
+  for (const el of doc.querySelectorAll("*")) {
+    const s = (el as HTMLElement).style;
+    try {
+      const cs = doc.defaultView?.getComputedStyle(el);
+      if (!cs) continue;
+      for (const prop of ALL_COLOR_PROPS) {
+        const val = cs.getPropertyValue(prop);
+        if (val && UNSUPPORTED_COLOR.test(val.trim())) {
+          s.setProperty(prop, "#888888", "important");
+        }
+      }
+    } catch { /* skip */ }
+  }
+
+  // Pass 5: fix SVG attributes
+  for (const el of doc.querySelectorAll("[fill], [stroke]")) {
+    for (const attr of SVG_COLOR_ATTRS) {
+      const val = el.getAttribute(attr);
+      if (val && UNSUPPORTED_COLOR.test(val.trim())) {
+        el.setAttribute(attr, "#888888");
       }
     }
-  } catch {
-    // Error accessing stylesheets, skip
   }
 }
 
