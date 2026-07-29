@@ -196,7 +196,7 @@ export default function Sidebar({
           className="w-full mt-5 bg-brand hover:bg-brand-hover text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          Registrar Ausencia
+          Registrar Ausencia Programada
         </button>
       </div>
 

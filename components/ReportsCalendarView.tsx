@@ -35,6 +35,8 @@ export default function ReportsCalendarView() {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [selectedMonthTab, setSelectedMonthTab] = useState<string>("Todos");
   const [showDayModal, setShowDayModal] = useState(false);
+  const [showConfirmAbsence, setShowConfirmAbsence] = useState(false);
+  const [pendingAbsence, setPendingAbsence] = useState<{ dateStr: string; typeId: string; notes: string } | null>(null);
   const [newAbsenceNotes, setNewAbsenceNotes] = useState("");
   const [selectedDayDetail, setSelectedDayDetail] = useState<{
     dateStr: string; dayNum: number; monthIndex: number; absence?: Absence; absenceType?: AbsenceType; leaveRequest?: LeaveRequest;
@@ -619,7 +621,10 @@ export default function ReportsCalendarView() {
                         return (
                           <button
                             key={t.id}
-                            onClick={() => handleQuickAddAbsence(selectedDayDetail.dateStr, t.id, newAbsenceNotes)}
+                            onClick={() => {
+                              setPendingAbsence({ dateStr: selectedDayDetail.dateStr, typeId: t.id, notes: newAbsenceNotes });
+                              setShowConfirmAbsence(true);
+                            }}
                             className="flex items-center justify-between w-full hover:bg-slate-800/60 border border-slate-800 bg-slate-950/40 p-2.5 rounded-xl text-left text-xs transition-all cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
@@ -635,6 +640,60 @@ export default function ReportsCalendarView() {
                     </div>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showConfirmAbsence && pendingAbsence && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowConfirmAbsence(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl"
+            >
+              <div className="flex items-center justify-between px-5 py-4 bg-slate-950/50 border-b border-slate-800 rounded-t-2xl">
+                <h3 className="text-sm font-bold text-white">Confirmar Registro</h3>
+                <button
+                  onClick={() => setShowConfirmAbsence(false)}
+                  className="text-slate-500 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-slate-300">
+                  Se va a registrar una inasistencia para el{" "}
+                  <strong className="text-white">{pendingAbsence.dateStr}</strong>.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowConfirmAbsence(false)}
+                    className="flex-1 bg-transparent border border-slate-700 hover:bg-slate-800 rounded-xl py-2.5 text-xs font-semibold text-slate-400 transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await handleQuickAddAbsence(pendingAbsence.dateStr, pendingAbsence.typeId, pendingAbsence.notes);
+                      setShowConfirmAbsence(false);
+                      setPendingAbsence(null);
+                    }}
+                    className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-2.5 text-xs font-semibold transition-all cursor-pointer shadow-[0_0_15px_rgba(214,0,0,0.2)]"
+                  >
+                    Confirmar
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

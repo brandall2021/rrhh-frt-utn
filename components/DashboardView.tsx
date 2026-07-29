@@ -134,7 +134,7 @@ export default function DashboardView({
           className="bg-brand hover:bg-brand-hover text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-[0_0_15px_rgba(214, 0, 0,0.3)] border border-brand-light/20 transition-all active:scale-95 cursor-pointer"
         >
           <span className="text-[15px] font-bold">+</span>
-          Registrar Ausencia
+          Registrar Ausencia Programada
         </button>
       </div>
 
