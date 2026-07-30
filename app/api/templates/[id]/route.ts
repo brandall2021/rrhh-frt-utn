@@ -1,16 +1,19 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { getTemplate, saveTemplate, deleteTemplate } from "@/lib/templates";
+import { templateUpdateSchema } from "@/lib/validation";
+import { apiSuccess, apiError, handleZodError } from "@/lib/api-error";
 
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return apiError("No autorizado", 401);
+
   const template = await getTemplate(params.id);
-  if (!template) return Response.json({ error: "Not found" }, { status: 404 });
-  return Response.json({ data: template });
+  if (!template) return apiError("Plantilla no encontrada", 404);
+  return apiSuccess(template);
 }
 
 export async function PUT(
@@ -18,23 +21,21 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return apiError("No autorizado", 401);
 
-  let body: Record<string, unknown>;
+  let body: unknown;
   try { body = await request.json(); } catch {
-    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    return apiError("JSON inválido", 400);
   }
 
-  const { subject, body: htmlBody } = body as any;
-  if (!subject || !htmlBody) {
-    return Response.json({ error: "subject y body son requeridos" }, { status: 400 });
-  }
+  const parsed = templateUpdateSchema.safeParse(body);
+  if (!parsed.success) return handleZodError(parsed.error);
 
   const existing = await getTemplate(params.id);
-  if (!existing) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!existing) return apiError("Plantilla no encontrada", 404);
 
-  const updated = await saveTemplate({ name: existing.name, subject, body: htmlBody }, params.id);
-  return Response.json({ data: updated });
+  const updated = await saveTemplate({ name: existing.name, ...parsed.data }, params.id);
+  return apiSuccess(updated);
 }
 
 export async function DELETE(
@@ -42,7 +43,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return apiError("No autorizado", 401);
+
   await deleteTemplate(params.id);
-  return Response.json({ success: true });
+  return apiSuccess({ success: true });
 }

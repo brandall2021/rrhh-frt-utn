@@ -78,6 +78,54 @@ export const birthdayMailSchema = z.object({
   employeeId: z.string().min(1, "employeeId requerido"),
 });
 
+const userRoleEnum = z.enum(["SUPERADMIN", "ADMIN", "OPERADOR"]);
+const userStatusEnum = z.enum(["ACTIVO", "INACTIVO"]);
+
+export const adminUserCreateSchema = z.object({
+  email: z.string().email("Email inválido"),
+  name: z.string().optional(),
+});
+
+export const adminUserUpdateSchema = z.object({
+  id: z.string().min(1, "ID requerido"),
+  role: userRoleEnum.optional(),
+  status: userStatusEnum.optional(),
+}).refine((d) => d.role || d.status, { message: "Debe enviar role o status" });
+
+export const absenceBulkItemSchema = z.object({
+  id: z.string().optional(),
+  absenceTypeId: z.string().min(1),
+  date: dateStr,
+  notes: z.string().optional(),
+});
+
+export const absenceBulkSchema = z.array(absenceBulkItemSchema);
+
+export const vacationCreateSchema = z.object({
+  employeeId: z.string().min(1, "Empleado requerido"),
+  year: z.number().int().min(2020).max(2100),
+  totalDays: z.number().int().min(0),
+  usedDays: z.number().int().min(0).optional(),
+  pendingPrev: z.number().int().min(0).optional(),
+  observations: z.string().optional(),
+});
+
+export const templateCreateSchema = z.object({
+  name: z.string().min(1, "Nombre requerido").max(100),
+  subject: z.string().min(1, "Asunto requerido").max(200),
+  body: z.string().min(1, "Cuerpo requerido"),
+});
+
+export const templateUpdateSchema = z.object({
+  subject: z.string().min(1, "Asunto requerido").max(200),
+  body: z.string().min(1, "Cuerpo requerido"),
+});
+
+export const emailSendSchema = z.object({
+  to: z.string().email("Email inválido"),
+  date: dateStr.optional(),
+});
+
 export const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",

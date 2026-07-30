@@ -1,6 +1,8 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { absenceTypeArraySchema } from "@/lib/validation";
+import { apiSuccess, apiError, handleZodError } from "@/lib/api-error";
 
 const DEFAULT_TYPES = [
   { name: "Enfermedad", code: "ENF", color: "red" },
@@ -27,29 +29,33 @@ async function ensureDefaultTypes(): Promise<void> {
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return apiError("No autorizado", 401);
 
   await ensureDefaultTypes();
   const types = await prisma.absenceType.findMany({ orderBy: { name: "asc" } });
-  return Response.json({ data: types });
+  return apiSuccess(types);
 }
 
 export async function PUT(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return apiError("No autorizado", 401);
+
+  let body: unknown;
+  try { body = await request.json(); }
+  catch { return apiError("JSON inválido", 400); }
+
+  const parsed = absenceTypeArraySchema.safeParse(body);
+  if (!parsed.success) return handleZodError(parsed.error);
 
   try {
-    const body = await request.json();
-    const types = body.types as { name: string; code: string; color: string }[];
-
     const saved = await prisma.$transaction(async (tx) => {
       await tx.absenceType.deleteMany();
-      await tx.absenceType.createMany({ data: types });
+      await tx.absenceType.createMany({ data: parsed.data });
       return tx.absenceType.findMany({ orderBy: { name: "asc" } });
     });
 
-    return Response.json({ data: saved });
+    return apiSuccess(saved);
   } catch {
-    return Response.json({ error: "Invalid request" }, { status: 400 });
+    return apiError("Error al guardar tipos de ausencia", 500);
   }
 }
