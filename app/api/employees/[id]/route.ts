@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { getEmployeeById, updateEmployee } from "@/lib/employees";
+import { getEmployeeById, updateEmployee, deleteEmployee } from "@/lib/employees";
+import { logAudit, getClientIp } from "@/lib/audit";
 
 export async function GET(
   _request: Request,
@@ -40,4 +41,27 @@ export async function PUT(
     }
     return Response.json({ error: "Error al actualizar empleado" }, { status: 500 });
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+  const deleted = await deleteEmployee(params.id);
+  if (!deleted) return Response.json({ error: "Not found" }, { status: 404 });
+
+  await logAudit({
+    action: "DELETE",
+    entityType: "EMPLEADO",
+    entityId: params.id,
+    description: `Empleado ${params.id} eliminado (soft delete)`,
+    performedBy: session.user?.email ?? "desconocido",
+    adminName: session.user?.name ?? undefined,
+    ipAddress: getClientIp(request),
+  });
+
+  return Response.json({ success: true });
 }

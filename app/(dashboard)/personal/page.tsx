@@ -27,6 +27,15 @@ export default function PersonalPage() {
     fetchEmployees();
   }, [fetchEmployees]);
 
+  const handleDeleteEmployee = async (id: string) => {
+    try {
+      await fetch(`/api/employees/${id}`, { method: "DELETE" });
+      await fetchEmployees();
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+    }
+  };
+
   const handleAddEmployee = async (newEmp: Partial<Employee>) => {
     try {
       await fetch("/api/employees", {
@@ -53,6 +62,7 @@ export default function PersonalPage() {
       employees={employees}
       onEmployeeClick={(id) => router.push(`/personal/${id}`)}
       onAddEmployee={handleAddEmployee}
+      onDeleteEmployee={handleDeleteEmployee}
       searchTerm={searchTerm}
     />
   );

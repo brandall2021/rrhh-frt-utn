@@ -64,7 +64,7 @@ model Department {
 }
 
 model Employee {
-  id               String         @id // ID del sistema legado, ej: "EMP-2941". Requerido al crear.
+  id               String         @id
   firstName        String
   lastName         String
   department       Department     @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -84,8 +84,11 @@ model Employee {
   documents        Document[]
   absences         Absence[]
   vacations        Vacation[]
+  deletedAt        DateTime?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+
+  @@index([deletedAt])
 }
 
 model LeaveRequest {

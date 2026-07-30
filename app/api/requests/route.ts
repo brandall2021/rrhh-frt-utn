@@ -9,9 +9,22 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const state = searchParams.get("state") as any;
   const employeeId = searchParams.get("employeeId") ?? undefined;
+  const department = searchParams.get("department") ?? undefined;
+  const dateFrom = searchParams.get("dateFrom") ?? undefined;
+  const dateTo = searchParams.get("dateTo") ?? undefined;
+  const skip = Math.max(Number(searchParams.get("skip")) || 0, 0);
+  const take = Math.min(Number(searchParams.get("take")) || 200, 500);
 
-  const data = await getRequests({ state: state ?? undefined, employeeId });
-  return Response.json({ data });
+  const result = await getRequests({
+    state: state ?? undefined,
+    employeeId,
+    department,
+    dateFrom,
+    dateTo,
+    skip,
+    take,
+  });
+  return Response.json(result);
 }
 
 export async function POST(request: Request) {

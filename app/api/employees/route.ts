@@ -8,10 +8,12 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url)
   const search = url.searchParams.get('search') || undefined
+  const departmentId = url.searchParams.get('departmentId') || undefined
+  const status = url.searchParams.get('status') || undefined
   const limit = Math.min(Number(url.searchParams.get('limit')) || 200, 500)
   const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0)
 
-  const result = await getEmployees({ search, limit, offset });
+  const result = await getEmployees({ search, departmentId, status, limit, offset });
   return Response.json(result);
 }
 

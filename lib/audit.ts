@@ -1,8 +1,8 @@
 import { prisma } from "./db";
 
 export interface AuditEntry {
-  action: "CREATE" | "DELETE";
-  entityType: "AUSENCIA" | "LICENCIA";
+  action: "CREATE" | "DELETE" | "UPDATE";
+  entityType: "AUSENCIA" | "LICENCIA" | "SOLICITUD" | "EMPLEADO";
   entityId?: string;
   employeeId?: string;
   employeeName?: string;

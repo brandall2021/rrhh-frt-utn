@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { updateRequestState } from "@/lib/requests";
 import { requestStateSchema } from "@/lib/validation";
+import { getClientIp } from "@/lib/audit";
 
 export async function PUT(
   request: Request,
@@ -23,7 +24,11 @@ export async function PUT(
   }
 
   try {
-    const updated = await updateRequestState(params.id, parsed.data.state);
+    const updated = await updateRequestState(params.id, parsed.data.state, {
+      performedBy: session.user?.email ?? "desconocido",
+      adminName: session.user?.name ?? undefined,
+      ipAddress: getClientIp(request),
+    });
     if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
     return Response.json({ data: updated });
   } catch (err) {

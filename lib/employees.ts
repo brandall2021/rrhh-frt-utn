@@ -33,8 +33,8 @@ function formatDate(d: Date | null | undefined): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function getEmployees(opts?: { search?: string; limit?: number; offset?: number }) {
-  const where: Prisma.EmployeeWhereInput = {}
+export async function getEmployees(opts?: { search?: string; departmentId?: string; status?: string; limit?: number; offset?: number }) {
+  const where: Prisma.EmployeeWhereInput = { deletedAt: null }
   if (opts?.search) {
     const s = opts.search
     where.OR = [
@@ -44,6 +44,12 @@ export async function getEmployees(opts?: { search?: string; limit?: number; off
       { cuil: { contains: s } },
       { id: { contains: s } },
     ]
+  }
+  if (opts?.departmentId) {
+    where.departmentId = opts.departmentId
+  }
+  if (opts?.status) {
+    where.status = opts.status as any
   }
 
   const [employees, total] = await Promise.all([
@@ -132,6 +138,21 @@ export async function createEmployee(data: Record<string, unknown>) {
       emergencyContact: (parsed.emergencyContact ?? {}) as Prisma.JsonObject,
     },
   });
+}
+
+export async function deleteEmployee(id: string): Promise<boolean> {
+  try {
+    await prisma.employee.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+    return true;
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return false;
+    }
+    throw err;
+  }
 }
 
 export async function updateEmployee(id: string, data: Record<string, unknown>) {

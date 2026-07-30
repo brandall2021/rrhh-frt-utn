@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  Trash2,
 } from "lucide-react";
 import { Employee } from "@/types";
 
@@ -25,6 +26,7 @@ interface PersonalListViewProps {
   employees: Employee[];
   onEmployeeClick: (id: string) => void;
   onAddEmployee: (employee: Partial<Employee>) => void;
+  onDeleteEmployee?: (id: string) => Promise<void>;
   searchTerm: string;
 }
 
@@ -32,6 +34,7 @@ export default function PersonalListView({
   employees,
   onEmployeeClick,
   onAddEmployee,
+  onDeleteEmployee,
   searchTerm: parentSearchTerm,
 }: PersonalListViewProps) {
   const [localSearch, setLocalSearch] = useState("");
@@ -47,6 +50,7 @@ export default function PersonalListView({
   const [newCuil, setNewCUIL] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const activeSearchTerm = localSearch || parentSearchTerm;
 
@@ -299,6 +303,14 @@ export default function PersonalListView({
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
+                  {onDeleteEmployee && (
+                    <button
+                      onClick={() => setDeleteConfirm(emp.id)}
+                      className="w-8 h-8 flex items-center justify-center border border-rose-800/50 rounded-xl text-rose-400 hover:text-white hover:bg-rose-800/50 transition-all cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             ))
@@ -342,6 +354,44 @@ export default function PersonalListView({
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 max-w-sm w-full p-6 text-center"
+          >
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-rose-400" />
+            </div>
+            <h3 className="text-sm font-bold text-white mb-2">Eliminar Empleado</h3>
+            <p className="text-xs text-slate-400 mb-6">
+              ¿Estás seguro? El empleado quedará inactivo y no aparecerá en los listados. El historial de ausencias y solicitudes se conserva.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 bg-transparent border border-slate-800 hover:bg-slate-800 rounded-xl py-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  if (deleteConfirm && onDeleteEmployee) {
+                    await onDeleteEmployee(deleteConfirm);
+                  }
+                  setDeleteConfirm(null);
+                }}
+                className="flex-1 bg-rose-600 hover:bg-rose-500 text-white rounded-xl py-2 text-xs font-semibold transition-all cursor-pointer"
+              >
+                Eliminar
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Add Employee Modal Integration */}
       {isAddModalOpen && (
